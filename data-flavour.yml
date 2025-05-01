@@ -1,0 +1,18 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    update_vm: yes
+  tasks:
+    - name: Update VM
+      ansible.builtin.include_role:
+        name: ewc-ansible-role-update-vm
+      when: update_vm
+
+    - name: Mars client
+      ansible.builtin.include_role:
+        name: ewc-ansible-role-mars-client
+
+    - name: ECMWF Toolbox
+      ansible.builtin.include_role:
+        name: ewc-ansible-role-ecmwf-toolbox

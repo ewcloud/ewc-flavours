@@ -1,0 +1,22 @@
+---
+# Ansible Requirements
+roles:
+  - name: ewc-ansible-role-update-system
+    src: https://github.com/ewcloud/ewc-ansible-role-update-system.git
+    version: main
+
+  - name: ewc-ansible-role-mars-client
+    src: https://github.com/ewcloud/ewc-ansible-role-mars-client.git
+    version: main
+
+  - name: ewc-ansible-role-conda
+    src: https://github.com/ewcloud/ewc-ansible-role-conda.git
+    version: main
+
+  - name: ewc-ansible-role-ecmwf-toolbox
+    src: https://github.com/ewcloud/ewc-ansible-role-ecmwf-toolbox.git
+    version: main
+
+  - name: ewc-ansible-role-jupyterhub-local
+    src: https://github.com/ewcloud/ewc-ansible-role-jupyterhub-local.git
+    version: main
