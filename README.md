@@ -1,5 +1,5 @@
-EWC Automation of ECMWF Instance Flavours
-=========================================
+EWC Automation of EWC Instance Flavours
+=======================================
 
 This repository contains Ansible playbooks for customising EWC instances with specific software stacks:
 
