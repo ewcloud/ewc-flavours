@@ -14,14 +14,12 @@ Getting started
   ```
   $ ansible-galaxy role install -r requirements.yml roles/
   ```
-  ```
 
 * Define your inventory in `inventory`
 * Run the apropriate playbook 
 
   ```
   $ ansible-playbook -i inventory playbookname.yml
-  
   ```
 
 Available Playbooks
