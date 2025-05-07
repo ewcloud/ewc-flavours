@@ -3,8 +3,8 @@ EWC Automation of EWC Instance Flavours
 
 This repository contains Ansible playbooks for customising EWC instances with specific software stacks:
 
-- data-flavour: includes the basic ECMWF software stack, with MARS client and an environment with ecCodes, Metview, Earthkit and Aviso.
-- jupyterhub-flavour: install and run jupyterhub on your instance, offering a convenient way to access it through the web.
+- **ECMWF data flavour**: includes the basic ECMWF software stack, with MARS client and an environment with ecCodes, Metview, Earthkit and Aviso.
+- **Jupyterhub flavour**: installs and run jupyterhub on your instance, offering a convenient way to access it through the web.
 
 Getting started
 ---------------
