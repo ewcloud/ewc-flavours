@@ -24,7 +24,7 @@ Getting started
 
 Available Playbooks
 -------------------
-- data-flavour.yml
+- ecmwf-data-flavour.yml
 - jupyterhub-flavour.yml
 
 License
