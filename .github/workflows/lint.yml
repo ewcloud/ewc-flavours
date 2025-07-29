@@ -22,7 +22,7 @@ jobs:
       matrix:
         python-version: ['3.9']
     env:
-      ANSIBLE_PATH: .
+      ANSIBLE_PATH: ./playbooks
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
