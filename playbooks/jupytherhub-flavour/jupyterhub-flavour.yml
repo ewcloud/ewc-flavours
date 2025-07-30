@@ -1,8 +1,9 @@
 ---
-- hosts: all
-  become: yes
+- name: Jupyterhub Flavour
+  hosts: all
+  become: true
   vars:
-    update_vm: yes
+    update_vm: true
   tasks:
     - name: Update VM
       ansible.builtin.include_role:
