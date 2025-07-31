@@ -48,12 +48,12 @@ ansible-playbook -i inventory.yml ssh-bastion-flavour.yml
 [official Ansible documentation](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html).
 
 You can also run in non-interactive mode by passing the
-`--extra-vars` or `-e` flag, followed by a `"<input name>=<input value>"` key-value pair.
-The flag and its follow up key-value pair must be set for each and every input ([see inputs section below](#inputs)):
+`--extra-vars` or `-e` flag, followed by a map of  key-value pairs; one for each and every input (see available [inputs](#inputs) below):
+
 ```bash
 ansible-playbook \
   -i inventory.yml \
-  -e whitelisted_ip_ranges_override=['10.0.0.0/24'] \
+  -e '{"whitelisted_ip_ranges_override": ["10.0.0.0/24","192.168.1.0/24"]}' \
   ssh-bastion-flavour.yml
 ```
 
@@ -61,4 +61,4 @@ ansible-playbook \
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
-| whitelisted_ip_ranges_override | IPv4 ranges (in CIDR format) to be whitelisted in Fail2ban configuration. Example: `['10.0.0.0/24']` | `list(string)` | n/a | no |
+| whitelisted_ip_ranges_override | IPv4 ranges (in CIDR format) to be whitelisted in Fail2ban configuration. Example: `['10.0.0.0/24', '192.168.1.0/24"]` | `list(string)` | n/a | no |
