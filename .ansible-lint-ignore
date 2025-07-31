@@ -1,0 +1,3 @@
+playbooks/jupytherhub-flavour/jupytherhub-flavour.yml var-naming[no-role-prefix]
+playbooks/ecmwf-data-flavour/ecmwf-data-flavour.yml var-naming[no-role-prefix]
+playbooks/ssh-bastion-flavour/ssh-bastion-flavour.yml var-naming[no-role-prefix]
