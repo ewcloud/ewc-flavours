@@ -6,6 +6,7 @@ This repository contains Ansible playbooks for customising EWC instances with sp
 - **ECMWF data flavour**: includes the basic ECMWF software stack, with MARS client and an environment with ecCodes, Metview, Earthkit and Aviso.
 - **Jupyterhub flavour**: installs and run jupyterhub on your instance, offering a convenient way to access it through the web.
 3. [ssh-bastion-flavour](./playbooks/ssh-bastion-flavour/): configures an SSH daemon on your instance, providing a secure entrypoint from the public internet into the EWC private network.
+4. [remote-desktop-flavour](./playbooks/remote-desktop-flavour/): enable users to operate the remote virtual machines through a typical graphical interface
 
 Getting started
 ---------------

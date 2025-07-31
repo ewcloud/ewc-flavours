@@ -1,0 +1,18 @@
+---
+- name: Configure Remote Desktop server
+  hosts: all
+  become: true
+  become_user: root
+  become_method: ansible.builtin.sudo
+
+  vars_prompt:
+    - name: whitelisted_ip_ranges_override
+      prompt: IPv4 ranges (in CIDR format) to be whitelisted in Fail2ban configuration. Or press Enter to skip
+      private: false
+
+  tasks:
+    - name: EWC Ansible Role Remote Desktop
+      ansible.builtin.include_role:
+        name: ewc-ansible-role-remote-desktop-1.0.0
+      vars:
+        whitelisted_ip_ranges: "{{ whitelisted_ip_ranges_override }}"
