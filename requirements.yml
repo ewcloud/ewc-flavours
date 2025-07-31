@@ -20,3 +20,7 @@ roles:
   - name: ewc-ansible-role-jupyterhub-local
     src: https://github.com/ewcloud/ewc-ansible-role-jupyterhub-local.git
     version: main
+
+  - name: ewc-ansible-role-ssh-bastion-1.3.0
+    src: https://github.com/ewcloud/ewc-ansible-role-ssh-bastion.git
+    version: 1.3.0
