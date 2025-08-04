@@ -7,3 +7,5 @@ playbooks/ipa-client-enroll-flavour/ipa-client-enroll-flavour.yml var-naming[no-
 playbooks/ipa-client-enroll-flavour/ipa-client-enroll-flavour.yml yaml[line-length]
 playbooks/ipa-client-disenroll-flavour/ipa-client-disenroll-flavour.yml var-naming[no-role-prefix]
 playbooks/ipa-client-disenroll-flavour/ipa-client-disenroll-flavour.yml yaml[line-length]
+playbooks/ipa-client-enroll-automation-via-morpheus/ipa-client-enroll-via-morpheus.yml var-naming[no-role-prefix]
+playbooks/ipa-client-enroll-automation-via-morpheus/ipa-client-disenroll-via-morpheus.yml var-naming[no-role-prefix]
