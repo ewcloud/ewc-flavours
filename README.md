@@ -7,6 +7,10 @@ This repository contains Ansible playbooks for customising EWC instances with sp
 - **Jupyterhub flavour**: installs and run jupyterhub on your instance, offering a convenient way to access it through the web.
 3. [ssh-bastion-flavour](./playbooks/ssh-bastion-flavour/): configures an SSH daemon on your instance, providing a secure entrypoint from the public internet into the EWC private network.
 4. [remote-desktop-flavour](./playbooks/remote-desktop-flavour/): enable users to operate the remote virtual machines through a typical graphical interface
+5. [ipa-server-flavour](./playbooks/ipa-server-flavour/): installs [FreeIPA](https://www.freeipa.org/About.html) on your instance, to enable centralized authentication, authorization and account information by storing data about user, groups, hosts and other objects necessary to manage the security aspects of a network of computers
+6. [ipa-client-enroll-flavour](./playbooks/ipa-client-enroll-flavour/): enroll your instance into the services provided by a host previously configured by [ipa-server-flavour](./playbooks/ipa-server-flavour/)
+7. [ipa-client-disenroll-flavour](./playbooks/ipa-client-disenroll-flavour/): disenrolls your instance if it was previously configured by [ipa-client-enroll-flavour](./playbooks/ipa-client-enroll-flavour/)
+
 
 Getting started
 ---------------
