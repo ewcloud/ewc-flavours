@@ -1,15 +1,146 @@
 ---
+- name: Provision VM via Terraform and authorized OpenStack application credentials
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_prompt:
+    - name: ewc_provider
+      prompt: choose your target EWC provider to be either 'ecmwf' or 'eumetsat'
+      private: false
+
+    - name: tf_project_path
+      prompt: path to terraform module directory
+      private: false
+      default: "~/ewc-tf-module-openstack-compute"
+
+    - name: app_name_override
+      prompt: application name, used as prefix in the full instance name
+      private: false
+
+    - name: instance_name_override
+      prompt: name of the instance, used in the full instance name
+      private: false
+
+    - name: instance_index_override
+      prompt: index or identifier for the instance, used as suffix in the full instance name
+      private: false
+
+    - name: public_keypair_name_override
+      prompt: name of public keypair (stored in OpenStack) to be copied into the instance for remote SSH access
+
+    - name: private_keypair_path
+      prompt: path to the local private keypair to use for SSH access to the instance. Or press Enter to accept default
+      default: "~/.ssh/id_rsa"
+
+    - name: security_groups_override
+      prompt: list of security group names to apply to the instance
+      private: false
+
+    - name: instance_has_fip_override
+      prompt: whether to assign a floating IP to the instance
+      private: false
+
+  vars:
+    ecmwf_defaults:
+      image_name_override: "ubuntu-22.04-20250204105649"
+      flavor_name_override: "2cpu-2gbmem-30gbdisk"
+      external_network_name_override: "external-internet"
+      networks_override:
+        - "private-cci1-ewcloud-eumetsat-ewc-communityhub"
+
+    eumetsat_defaults:
+      image_name_override: "ubuntu-22.04-20250204105649"
+      flavor_name_override: "eo1.small"
+      external_network_name_override: "external"
+      networks_override:
+        - "private"
+
+  pre_tasks:
+    - name: Validate user input
+      ansible.builtin.assert:
+        that:
+          - ewc_provider is defined and ewc_provider != ''
+          - ewc_provider | lower in ['ecmwf', 'eumetsat']
+        fail_msg: "Input validation failed. See README.md for information on required inputs and their format."
+        success_msg: "User input configuration is valid."
+
+    - name: Set remaining default values based on user-specified EWC provider
+      ansible.builtin.set_fact:
+        defaults: >-
+          {{
+            ( ewc_provider == 'ecmwf' ) | ternary(ecmwf_defaults, eumetsat_defaults)
+          }}
+
+    - name: Set path to local filename for the Terraform state
+      ansible.builtin.set_fact:
+        tf_state_file: "{{ tf_project_path }}/terraform.tfstate"
+
+  tasks:
+    - name: Ensure Terraform is initialized
+      community.general.terraform:
+        project_path: "{{ tf_project_path }}"
+        state_file: "{{ tf_state_file }}"
+        state: present
+        force_init: true
+        complex_vars: true
+        variables:
+          app_name: "{{ app_name_override }}"
+          instance_name: "{{ instance_name_override }}"
+          instance_index: "{{ instance_index_override }}"
+          security_groups: >-
+            {{
+              security_groups_override
+            }}
+          keypair_name: "{{ public_keypair_name_override }}"
+          instance_has_fip: "{{ instance_has_fip_override | bool }}"
+          image_name: "{{ defaults.image_name_override }}"
+          flavor_name: "{{ defaults.flavor_name_override }}"
+          networks: >-
+            {{
+              defaults.networks_override
+            }}
+          external_network_name: "{{ defaults.external_network_name_override }}"
+      register: tf_output
+      environment:
+        TF_IN_AUTOMATION: "true"
+
+    - name: List created/edited resources
+      ansible.builtin.debug:
+        msg:
+          - "Terraform state file: {{ tf_state_file }}"
+          - "OpenStack VM: {{ tf_output.outputs.instance.value.name }}"
+          - "OpenStack internal IP address: {{ tf_output.outputs.instance.value.internal_ip }}"
+          - "OpenStack public IP address: {{ tf_output.outputs.instance.value.floating_ip | default('N/A') }}"
+    
+    - name: Store IP address of the newly provisioned OpenStack VM
+      ansible.builtin.set_fact:
+        ipa_client_ip: "{{ tf_output.outputs.instance.value.floating_ip if instance_has_fip_override == 'yes' else tf_output.outputs.instance.value.internal_ip }}"
+    
+    - name: Store hostname of the newly provisioned OpenStack VM
+      ansible.builtin.set_fact:
+        ipa_client_hostname_override: "{{ tf_output.outputs.instance.value.name }}"
+    
+    - name: Wait for SSH to become available
+      ansible.builtin.wait_for:
+        host: "{{ ipa_client_ip }}"
+        port: 22
+        timeout: 300
+
+    - name: Add dynamic host to inventory
+      ansible.builtin.add_host:
+        name: "ipa_client"
+        ansible_host: "{{ ipa_client_ip }}"
+        ansible_user: "ubuntu"
+        ansible_ssh_private_key_file: "{{ private_keypair_path }}"
+
 - name: Install IPA client and enroll into an IPA server's LDAP/DNS services
-  hosts: all
+  hosts: ipa_client
   become: true
   become_user: root
   become_method: ansible.builtin.sudo
 
   vars_prompt:
-    - name: ipa_client_hostname_override
-      prompt: hostname of the target vm where the IPA client will be installed
-      private: false
-
     - name: ipa_domain_override
       prompt: domain name managed by the IPA server
       private: false
@@ -37,7 +168,7 @@
       ansible.builtin.include_role:
         name: ewc-ansible-role-ipa-client-enroll-1.0.0
       vars:
-        ipa_client_hostname: "{{ ipa_client_hostname_override }}"
+        ipa_client_hostname: "{{ hostvars['localhost']['ipa_client_hostname_override'] }}"
         ipa_domain: "{{ ipa_domain_override }}"
         ipa_server_hostname: "{{ ipa_server_hostname_override }}"
         ipa_admin_username: "{{ ipa_admin_username_override }}"
