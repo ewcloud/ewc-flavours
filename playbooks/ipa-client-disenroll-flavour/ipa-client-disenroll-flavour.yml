@@ -1,0 +1,40 @@
+---
+- name: Disenroll from an IPA server's LDAP/DNS services
+  hosts: all
+  become: true
+  become_user: root
+  become_method: ansible.builtin.sudo
+
+  vars_prompt:
+    - name: ipa_domain_override
+      prompt: domain name managed by the IPA server
+      private: false
+
+    - name: ipa_client_hostname_override
+      prompt: hostname of the target vm to be disenrolled from the IPA server
+      private: false
+
+    - name: ipa_server_hostname_override
+      prompt: hostname of the IPA server
+      private: false
+
+    - name: ipa_admin_username_override
+      prompt: username of the administrator account from the IPA server
+      private: false
+
+    - name: ipa_admin_password_override
+      prompt: password of the administrator account from the IPA server
+      private: true
+      unsafe: true
+      confirm: false
+
+  tasks:
+    - name: EWC Ansible Role IPA Client Disenroll
+      ansible.builtin.include_role:
+        name: ewc-ansible-role-ipa-client-disenroll-1.0.0
+      vars:
+        ipa_domain: "{{ ipa_domain_override }}"
+        ipa_client_hostname: "{{ ipa_client_hostname_override }}"
+        ipa_server_hostname: "{{ ipa_server_hostname_override }}"
+        ipa_admin_username: "{{ ipa_admin_username_override }}"
+        ipa_admin_password: "{{ ipa_admin_password_override }}"
