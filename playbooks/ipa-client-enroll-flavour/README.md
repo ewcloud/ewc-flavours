@@ -79,6 +79,9 @@ ED25519 key fingerprint is SHA256:aBcdE1f2GHh3iJKlMNOpqRstuV3Wxyzab4cdE+fGH45i.
 This key is not known by any other names
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 ```
+This will add an line to your `~/.ssh/known_hosts` file containing the IP address
+of the instance in question.
+
 ## Requirements
 
 | Name | Version |
@@ -105,3 +108,38 @@ Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 | ipa_admin_username_override | username of the administrator account from the IPA server | `string` | n/a | yes |
 | ipa_admin_password_override | password of the administrator account from the IPA server | `string` | n/a | yes |
 | password_allowed_ip_ranges_override | IP ranges (in CIDR format) to be allowed for password access in SSHD configuration. Example: `["10.0.0.0/24","192.168.1.0/24"]` | `list(string)` | n/a | yes |
+
+
+## Troubleshooting
+
+### Remote host identification has changed
+
+In cases where the following sequence of events took place:
+1. You successfully connected to the target VM via SSH at least once (by running this playbook until the end, by using the `ssh` utility in your shell, etc.)
+2. The VM was destroy and the recreated after the initial connection
+3. You run this playbook
+
+Execution may fail at the start of the IPA client installation, with the following error:
+```
+fatal: [ipa_client]: UNREACHABLE! => {
+  "changed": false,
+  "msg": "Failed to connect to the host via ssh: 
+    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+    Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+    It is also possible that a host key has just been changed.
+    The fingerprint for the ED25519 key sent by the remote host is
+    SHA256:aBcdE1f2GHh3iJKlMNOpqRstuV3Wxyzab4cdE+fGH45i.
+    Please contact your system administrator.
+    Add correct host key in /home/ubuntu/.ssh/known_hosts to get rid of this message.
+    Offending ECDSA key in /home/ubuntu/.ssh/known_hosts:21
+    Host key for 192.168.1.122 has changed and you have requested strict checking.
+    Host key verification failed.",
+  "unreachable": true
+}
+```
+To resolve the issue, remove the line in your `~/.ssh/know_hosts` file that
+shows the same IP address displayed in the error message before re-running
+the playbook.
