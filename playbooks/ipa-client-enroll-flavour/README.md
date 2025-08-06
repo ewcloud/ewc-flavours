@@ -1,4 +1,6 @@
 # IPA client enroll flavour
+> ⚠️  Only Ubuntu 22 and RockyLinux 8 VM images are currently supported. This is due to constrains imposed by dependencies (i.e. ewc-ansible-role-ipa-client-enroll version 1.0.0)
+
 A configuration template
 (i.e. an [Ansible Playbook](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html))
 to customize your environment in the
@@ -6,12 +8,8 @@ to customize your environment in the
 
 The template is designed to:
 
-* Provision a small virtual machine via Terraform (if its `.tfstate` file
-cannot be found a user-specified location), with the following specifications:
-  * Operative System: Ubuntu 22.04
-  * vCPUs: 2
-  * RAM: 2 GB
-  * Disk: 30 GB
+* Provision a virtual machine via Terraform (if its `.tfstate` file
+cannot be found a user-defined location), either with RockyLinux or Ubuntu, and with your desired flavor (a.k.a VM plan)
 * Configure the existing or newly provisioned RockyLinux or Ubuntu
 virtual machine to connect to an IPA server running on the same subnet,
 such that it:
@@ -31,6 +29,17 @@ Additionally, in order to configure the virtual machine after provisioning, you
 required a private and public SSH keypair. Checkout this
 [EWC documentation page](https://confluence.ecmwf.int/display/EWCLOUDKB/EWC+-+OpenStack+Command-Line+client#EWCOpenStackCommandLineclient-ImportSSHkey)
 for details on how import your public key into OpenStack.
+
+## Setup
+To successfully run this playbook, the following packages should be available in your work environment:
+
+| Name | Version | Package Info |
+|------|---------|-------|
+| git | >= 2.0.0 |  https://git-scm.com/downloads | 
+| python | >= 3.9.0 | https://www.python.org/downloads/  |
+| ansible | >= 2.14.0 | https://pypi.org/project/ansible  |
+| terraform | >= 0.14.0 | https://developer.hashicorp.com/terraform/install |
+| openstack | ~> 1.53.0 | https://pypi.org/project/python-openstackclient |
 
 ## Usage
 
@@ -79,18 +88,10 @@ ED25519 key fingerprint is SHA256:aBcdE1f2GHh3iJKlMNOpqRstuV3Wxyzab4cdE+fGH45i.
 This key is not known by any other names
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 ```
-This will add an line to your `~/.ssh/known_hosts` file containing the IP address
+This will add a line to your `~/.ssh/known_hosts` file, containing the IP address
 of the instance in question.
 
-## Requirements
 
-| Name | Version |
-|------|---------|
-| ansible | >= 2.14.0 |
-| terraform | >= 0.14.0 |
-| openstack | ~> 1.53.0 |
-
-## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
@@ -99,6 +100,8 @@ of the instance in question.
 | app_name_override | application name, used as prefix in the full instance name. Example: `ipa-client` | `string` | n/a | yes |
 | instance_name_override| name of the instance, used in the full instance name.  Example: `ubuntu` | `string` | n/a | yes |
 | instance_index_override | index or identifier for the instance, used as suffix in the full instance name. Example: `1` | `number` | n/a | yes |
+| flavor_name_override | name the flavor to use for the instance. To learn about available options, checkout the [official EWC VM plans documentation](https://confluence.ecmwf.int/display/EWCLOUDKB/EWC+VM+plans) | `string` | n/a | yes |
+| image_name_override | name of the image to use for the instance. Only Ubuntu 22 and RockyLinux 8 VM images are currently supported. This is due to constrains imposed by dependencies (i.e. ewc-ansible-role-ipa-client-enroll version 1.0.0). For complete information on  available options, see the [official EWC Images documentation](https://confluence.ecmwf.int/display/EWCLOUDKB/EWC+Virtual+Images+Available). Example: `ubuntu-22.04-20250204105649`  | `string` | n/a | yes |
 | public_keypair_name_override | name of public keypair (stored in OpenStack) to be copied into the instance for remote SSH access | `string` | n/a | yes |
 | private_keypair_name_override | path to the local private keypair to use for SSH access to the instance. Example: `~/.ssh/id_rsa` | `string` | n/a | yes |
 | security_groups_override | list of security group names to apply to the instance. Example: `['ipa']` | `list(string)` | n/a | yes |
@@ -108,6 +111,14 @@ of the instance in question.
 | ipa_admin_username_override | username of the administrator account from the IPA server | `string` | n/a | yes |
 | ipa_admin_password_override | password of the administrator account from the IPA server | `string` | n/a | yes |
 | password_allowed_ip_ranges_override | IP ranges (in CIDR format) to be allowed for password access in SSHD configuration. Example: `["10.0.0.0/24","192.168.1.0/24"]` | `list(string)` | n/a | yes |
+
+
+## Dependencies
+
+| Name | Version | Package Info |
+|------|---------|-------|
+| ewc-tf-module-openstack-compute | 1.0.0 | https://github.com/ewcloud/ewc-tf-module-openstack-compute  |
+| ewc-ansible-role-ipa-client-enroll | 1.0.0 |  https://github.com/ewcloud/ewc-ansible-role-ipa-client-enroll |
 
 
 ## Troubleshooting

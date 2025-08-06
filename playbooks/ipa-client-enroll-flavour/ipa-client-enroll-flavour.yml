@@ -26,6 +26,14 @@
       prompt: index or identifier for the instance, used as suffix in the full instance name
       private: false
 
+    - name: flavor_name_override
+      prompt: name the flavor to use for the instance
+      private: false
+
+    - name: image_name_override
+      prompt: name the image to use for the instance
+      private: false
+
     - name: public_keypair_name_override
       prompt: name of public keypair (stored in OpenStack) to be copied into the instance for remote SSH access
       private: false
@@ -40,20 +48,16 @@
       private: false
 
     - name: instance_has_fip_override
-      prompt: whether to assign a floating IP to the instance
+      prompt: whether to assign a floating IP to the instance. Only `yes` will be accepted to approve
       private: false
 
   vars:
     ecmwf_defaults:
-      image_name_override: "ubuntu-22.04-20250204105649"
-      flavor_name_override: "2cpu-2gbmem-30gbdisk"
       external_network_name_override: "external-internet"
       networks_override:
         - "private-cci1-ewcloud-eumetsat-ewc-communityhub"
 
     eumetsat_defaults:
-      image_name_override: "ubuntu-22.04-20250204105649"
-      flavor_name_override: "eo1.small"
       external_network_name_override: "external"
       networks_override:
         - "private"
@@ -84,6 +88,8 @@
         app_name_override_fact: "{{ app_name_override }}"
         instance_name_override_fact: "{{ instance_name_override }}"
         instance_index_override_fact: "{{ instance_index_override }}"
+        flavor_name_override_fact: "{{ flavor_name_override }}"
+        image_name_override_fact: "{{ image_name_override }}"
         security_groups_override_fact: "{{ security_groups_override }}"
         public_keypair_name_override_fact: "{{ public_keypair_name_override }}"
         instance_has_fip_override_fact: "{{ instance_has_fip_override }}"
@@ -106,8 +112,8 @@
             }}
           keypair_name: "{{ public_keypair_name_override }}"
           instance_has_fip: true # Temporarily required during post-provisioning
-          image_name: "{{ defaults.image_name_override }}"
-          flavor_name: "{{ defaults.flavor_name_override }}"
+          flavor_name: "{{ flavor_name_override }}"
+          image_name: "{{ image_name_override }}"
           networks: >-
             {{
               defaults.networks_override
@@ -139,7 +145,7 @@
       ansible.builtin.add_host:
         name: "ipa_client"
         ansible_host: "{{ ipa_client_public_ip }}"
-        ansible_user: "ubuntu"
+        ansible_user: "{{ 'ubuntu' if 'ubuntu' in image_name_override else 'cloud-user' }}"
         ansible_ssh_private_key_file: "{{ private_keypair_path }}"
 
 - name: Install IPA client and enroll into an IPA server's LDAP/DNS services
@@ -206,8 +212,8 @@
             }}
           keypair_name: "{{ hostvars['localhost']['public_keypair_name_override_fact'] }}"
           instance_has_fip: false
-          image_name: "{{ hostvars['localhost']['defaults']['image_name_override'] }}"
-          flavor_name: "{{ hostvars['localhost']['defaults']['flavor_name_override'] }}"
+          flavor_name: "{{ hostvars['localhost']['flavor_name_override_fact'] }}"
+          image_name: "{{ hostvars['localhost']['image_name_override_fact'] }}"
           networks: >-
             {{
               defaults.networks_override
