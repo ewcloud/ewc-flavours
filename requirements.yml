@@ -1,5 +1,10 @@
 ---
 # Ansible Requirements
+# TODO: Update version attributes to match MAJOR.MINOR.PATCH version (i.e. the git tag) of the roles,
+#       once available. Note that pinning down to the PATCH number in the `version` attribute while
+#       referencing only the MINOR version in the role name translates to Ansible Playbooks automatically
+#       import the latest fixes for Ansible Roles they depend on, assuming older versions of said Ansible
+#       Roles are not cached locally, in the `./roles` or `~/.ansible/roles` directories for example.
 roles:
   - name: ewc-ansible-role-update-system-1.0
     src: https://github.com/ewcloud/ewc-ansible-role-update-system.git
