@@ -10,7 +10,7 @@ This repository contains Ansible playbooks for customising EWC instances with sp
 5. [ipa-server-flavour](./playbooks/ipa-server-flavour/): installs [FreeIPA](https://www.freeipa.org/About.html) on an existing or new instance (provisioned by the template itself), to enable centralized authentication, authorization and account information by storing data about user, groups, hosts and other objects necessary to manage the security aspects of a network of computers
 6. [ipa-client-enroll-flavour](./playbooks/ipa-client-enroll-flavour/): enroll your instance into the services provided by a host previously configured by [ipa-server-flavour](./playbooks/ipa-server-flavour/)
 7. [ipa-client-disenroll-flavour](./playbooks/ipa-client-disenroll-flavour/): disenrolls your instance if it was previously configured by [ipa-client-enroll-flavour](./playbooks/ipa-client-enroll-flavour/)
-
+8. [ipa-client-provision-flavour](./playbooks/ipa-client-provision-flavour/): provision a new instance, or edits it if already existing, and configures to enroll into the services provided by an IPA server configured by [ipa-server-flavour](./playbooks/ipa-server-flavour/)
 
 Getting started
 ---------------

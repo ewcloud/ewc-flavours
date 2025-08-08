@@ -1,5 +1,5 @@
-# IPA client enroll flavour
-> ⚠️  Only Ubuntu 22 and RockyLinux 8 VM images are currently supported. This is due to constrains imposed by dependencies (i.e. ewc-ansible-role-ipa-client-enroll version 1.0.0)
+# IPA client provision flavour
+> ⚠️ Only Ubuntu 22.04 and RockyLinux 8.10 VM images are currently supported. This is due to constrains imposed by dependency on version 1.0 of [ewc-ansible-role-ipa-client-enroll](https://github.com/ewcloud/ewc-ansible-role-ipa-client-enroll).
 
 A configuration template
 (i.e. an [Ansible Playbook](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html))
@@ -52,7 +52,7 @@ prompts you for the necessary user inputs, and then applies changes to your
 target EWC environment:
 
 ```bash
-ansible-playbook ipa-client-enroll-flavour.yml
+ansible-playbook ipa-client-provision-flavour.yml
 ```
 
 #### 1.2. Non-Interactive Mode
@@ -66,12 +66,24 @@ You can also run in non-interactive mode by passing the
 ```bash
 ansible-playbook \
   -e '{
-        "password_allowed_ip_ranges_override": ["10.0.0.0/24","192.168.1.0/24"],
-        #  ...
-        # all remaining input overrides
-        # ...
+        "ewc_provider": "ecmwf",
+        "tf_project_path":"~/ewc-tf-module-openstack-compute",
+        "app_name_override":"ipa",
+        "instance_name_override":"client",
+        "instance_index_override": 1,
+        "flavor_name_override":"2cpu-2gbmem-30gbdisk",
+        "image_name_override":"ubuntu-22.04-20250204105649",
+        "public_keypair_name_override":"john-claudy-publickey",
+        "private_keypair_path":"~/.ssh/id_rsa",
+        "security_groups_override": ["ipa"],
+        "instance_has_fip_override":"no",
+        "ipa_domain_override":"ecmwf.sandbox.ewc",
+        "ipa_server_hostname_override":"ipa-server-1",
+        "ipa_admin_username_override":"<redacted>",
+        "ipa_admin_password_override":"<redacted>",
+        "password_allowed_ip_ranges_override": ["192.168.1.0/24"]
     }' \
-  ipa-client-enroll-flavour.yml
+  ipa-client-provision-flavour.yml
 ```
 
 Note manual interaction (i.e. typing in a `yes` value) will still be required
@@ -101,7 +113,7 @@ of the instance in question.
 | instance_name_override| name of the instance, used in the full instance name.  Example: `ubuntu` | `string` | n/a | yes |
 | instance_index_override | index or identifier for the instance, used as suffix in the full instance name. Example: `1` | `number` | n/a | yes |
 | flavor_name_override | name the flavor to use for the instance. To learn about available options, checkout the [official EWC VM plans documentation](https://confluence.ecmwf.int/display/EWCLOUDKB/EWC+VM+plans) | `string` | n/a | yes |
-| image_name_override | name of the image to use for the instance. Only Ubuntu 22 and RockyLinux 8 VM images are currently supported. This is due to constrains imposed by dependencies (i.e. ewc-ansible-role-ipa-client-enroll version 1.0.0). For complete information on  available options, see the [official EWC Images documentation](https://confluence.ecmwf.int/display/EWCLOUDKB/EWC+Virtual+Images+Available). Example: `ubuntu-22.04-20250204105649`  | `string` | n/a | yes |
+| image_name_override | name of the image to use for the instance. For complete information on  available options, see the [official EWC Images documentation](https://confluence.ecmwf.int/display/EWCLOUDKB/EWC+Virtual+Images+Available). ⚠️ Only Ubuntu 22.04 and RockyLinux 8.10 VM images are currently supported. This is due to constrains imposed by dependency on version 1.0 of [ewc-ansible-role-ipa-client-enroll](https://github.com/ewcloud/ewc-ansible-role-ipa-client-enroll). Example: `ubuntu-22.04-20250204105649`  | `string` | n/a | yes |
 | public_keypair_name_override | name of public keypair (stored in OpenStack) to be copied into the instance for remote SSH access | `string` | n/a | yes |
 | private_keypair_name_override | path to the local private keypair to use for SSH access to the instance. Example: `~/.ssh/id_rsa` | `string` | n/a | yes |
 | security_groups_override | list of security group names to apply to the instance. Example: `['ipa']` | `list(string)` | n/a | yes |
@@ -113,12 +125,12 @@ of the instance in question.
 | password_allowed_ip_ranges_override | IP ranges (in CIDR format) to be allowed for password access in SSHD configuration. Example: `["10.0.0.0/24","192.168.1.0/24"]` | `list(string)` | n/a | yes |
 
 
-## Dependencies
+## Requirements
 
 | Name | Version | Package Info |
 |------|---------|-------|
-| ewc-tf-module-openstack-compute | 1.0.0 | https://github.com/ewcloud/ewc-tf-module-openstack-compute  |
-| ewc-ansible-role-ipa-client-enroll | 1.0.0 |  https://github.com/ewcloud/ewc-ansible-role-ipa-client-enroll |
+| ewc-tf-module-openstack-compute | 1.0 | https://github.com/ewcloud/ewc-tf-module-openstack-compute  |
+| ewc-ansible-role-ipa-client-enroll | 1.0 |  https://github.com/ewcloud/ewc-ansible-role-ipa-client-enroll |
 
 
 ## Troubleshooting
