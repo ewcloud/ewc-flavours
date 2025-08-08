@@ -10,10 +10,6 @@ This repository contains Ansible playbooks for customizing EWC instances with sp
 Getting started
 ---------------
 
-> ⚠️ Playbooks in the root directory of this repository are deprecated and will be removed in release `2.0.0`.
-Please use their alternatives, maintained within the [playbooks](./playbooks/) subdirectory.
-Contact the EWC support for migration assistance.
-
 - Install ansible and other dependencies. You may want to do it in its own virtual environment (`pip install -r requirements.txt`)
 - Fetch the external requirements
   
