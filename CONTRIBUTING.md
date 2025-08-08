@@ -31,7 +31,7 @@ review/approval.
 
 On the maintainers' side:
 
-1. Review, validate/test internally, and provide feedback prior aproving the 
+1. Review, validate/test internally, and provide feedback prior to approving the 
 pull request.
 2. Upon approval, squash-merge the changes, making sure to provide a relevant
 conventional commit message title (checkout 
@@ -46,7 +46,7 @@ This repository enforces
 [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
 to mark breaking, major and minor code changes in accordance with the
 [Semantic Versioning](https://semver.org/) standard:
-- Commits that are merged to the main branch should always be prefixed by 
+- Commits that land on to the main branch should always be prefixed by a
 specific keyword (i.e. `docs`, `style`, `feat`, `fix`, `refactor`, `ci`, 
 `chore` or `test`)
 - Value is communicated to the end-users by three of the prefixes:
@@ -62,4 +62,3 @@ for reporting vulnerabilities. If you suspect you have found a security
 vulnerability, please do not file a GitHub issue, but instead email 
 [support@europeanweather.cloud](mailto:support@europeanweather.cloud) with the 
 full details, including steps to reproduce the issue.
-
