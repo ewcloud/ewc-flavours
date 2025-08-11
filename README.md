@@ -5,12 +5,18 @@ This repository contains Ansible playbooks for customising EWC instances with sp
 
 - **ECMWF data flavour**: includes the basic ECMWF software stack, with MARS client and an environment with ecCodes, Metview, Earthkit and Aviso.
 - **Jupyterhub flavour**: installs and run jupyterhub on your instance, offering a convenient way to access it through the web.
-3. [ssh-bastion-flavour](./playbooks/ssh-bastion-flavour/): configures an SSH daemon on your instance, providing a secure entrypoint from the public internet into the EWC private network.
-4. [remote-desktop-flavour](./playbooks/remote-desktop-flavour/): enable users to operate the remote virtual machines through a typical graphical interface
-5. [ipa-server-flavour](./playbooks/ipa-server-flavour/): installs [FreeIPA](https://www.freeipa.org/About.html) on an existing or new instance (provisioned by the template itself), to enable centralized authentication, authorization and account information by storing data about user, groups, hosts and other objects necessary to manage the security aspects of a network of computers
-6. [ipa-client-enroll-flavour](./playbooks/ipa-client-enroll-flavour/): enroll your instance into the services provided by a host previously configured by [ipa-server-flavour](./playbooks/ipa-server-flavour/)
-7. [ipa-client-disenroll-flavour](./playbooks/ipa-client-disenroll-flavour/): disenrolls your instance if it was previously configured by [ipa-client-enroll-flavour](./playbooks/ipa-client-enroll-flavour/)
-8. [ipa-client-provision-flavour](./playbooks/ipa-client-provision-flavour/): provision a new instance, or edits it if already existing, and configures to enroll into the services provided by an IPA server configured by [ipa-server-flavour](./playbooks/ipa-server-flavour/)
+3. [ipa-server-flavour](./playbooks/ipa-server-flavour/): installs [FreeIPA](https://www.freeipa.org/About.html) on an existing or new instance (provisioned by the template itself), to enable centralized authentication, authorization and account information by storing data about user, groups, hosts and other objects necessary to manage the security aspects of a network of computers.
+4. [ssh-bastion-flavour](./playbooks/ssh-bastion-flavour/): configures an SSH daemon on your instance, providing a secure entrypoint from the public internet into the EWC private network.
+5. [remote-desktop-flavour](./playbooks/remote-desktop-flavour/): enable users to operate the remote virtual machines through a typical graphical interface
+6. [ipa-client-enroll-flavour](./playbooks/ipa-client-enroll-flavour/): enroll your instance into the services provided by a host previously configured by [ipa-server-flavour](./playbooks/ipa-server-flavour/).
+7. [ipa-client-disenroll-flavour](./playbooks/ipa-client-disenroll-flavour/): disenrolls your instance if it was previously configured by [ipa-client-enroll-flavour](./playbooks/ipa-client-enroll-flavour/).
+8. [ipa-server-provision-flavour](./playbooks/ipa-server-provision-flavour/): provision a new instance, or edits it if already existing, and the applies [ipa-server-flavour](./playbooks/ipa-server-flavour/) on it.
+9. [ssh-bastion-provision-flavour](./playbooks/ssh-bastion-provision-flavour/): provision a new instance, or edits it if already existing, and then applies [ssh-bastion-flavour](./playbooks/ssh-bastion-flavour/) on it.
+10. [remote-desktop-provision-flavour](./playbooks/remote-desktop-provision-flavour/): provision a new instance, or edits it if already existing, and then applies [remote-desktop-flavour](./playbooks/remote-desktop-flavour) on it.
+11. [ipa-client-provision-flavour](./playbooks/ipa-client-provision-flavour/): provision a new instance, or edits it if already existing, and then applies [ipa-client-enroll-flavour](./playbooks/ipa-client-enroll-flavour/) on it.
+
+
+
 
 Getting started
 ---------------
