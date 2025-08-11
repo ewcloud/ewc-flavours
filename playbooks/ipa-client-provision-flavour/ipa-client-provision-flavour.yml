@@ -43,6 +43,10 @@
       private: false
       default: "~/.ssh/id_rsa"
 
+    - name: networks_override
+      prompt: list of network names to attach the instance to
+      private: false
+
     - name: security_groups_override
       prompt: list of security group names to apply to the instance
       private: false
@@ -54,13 +58,9 @@
   vars:
     ecmwf_defaults:
       external_network_name_override: "external-internet"
-      networks_override:
-        - "private-cci1-ewcloud-eumetsat-ewc-communityhub"
 
     eumetsat_defaults:
       external_network_name_override: "external"
-      networks_override:
-        - "private"
 
   pre_tasks:
     - name: Validate user input
@@ -78,10 +78,6 @@
             ( ewc_provider == 'ecmwf' ) | ternary(ecmwf_defaults, eumetsat_defaults)
           }}
 
-    - name: Set path to local filename for the Terraform state
-      ansible.builtin.set_fact:
-        tf_state_file: "{{ tf_project_path }}/terraform.tfstate"
-
     - name: Store user inputs for cleanup and execution summary
       ansible.builtin.set_fact:
         tf_project_path_fact: "{{ tf_project_path }}"
@@ -90,17 +86,34 @@
         instance_index_override_fact: "{{ instance_index_override }}"
         flavor_name_override_fact: "{{ flavor_name_override }}"
         image_name_override_fact: "{{ image_name_override }}"
+        networks_override_fact: "{{ networks_override }}"
         security_groups_override_fact: "{{ security_groups_override }}"
         public_keypair_name_override_fact: "{{ public_keypair_name_override }}"
         instance_has_fip_override_fact: "{{ instance_has_fip_override }}"
 
   tasks:
-    - name: Ensure Terraform is initialized
+    - name: Clone Terraform module into a designated directory for the instance
+      ansible.builtin.git:
+        repo: git@gitlab.eumetsat.int:HP-EWC/ewc-community-hub/ewcloud/ewc-tf-module-openstack-compute.git
+        key_file: ~/.ssh/eum_id_ed25519.pub
+        dest: "{{ tf_project_path }}"
+        version: quality-assurance
+        update: true
+      environment:
+        GIT_TERMINAL_PROMPT: "0" # reports "terminal prompts disabled" on missing password
+
+    - name: Check if Terraform state file exists
+      ansible.builtin.stat:
+        path: "{{ tf_project_path }}/terraform.tfstate"
+      register: tfstate_file
+
+    - name: Perform initial instance provisioning
       community.general.terraform:
         project_path: "{{ tf_project_path }}"
-        state_file: "{{ tf_state_file }}"
         state: present
         force_init: true
+        overwrite_init: false
+        provider_upgrade: false
         complex_vars: true
         variables:
           app_name: "{{ app_name_override }}"
@@ -111,29 +124,68 @@
               security_groups_override
             }}
           keypair_name: "{{ public_keypair_name_override }}"
-          instance_has_fip: true # Temporarily required during post-provisioning
+          # NOTE: Public IP (i.e. `instance_has_fip: true`) is required in
+          # post-provisioning, to configure instance via ssh from a localhost.
+          # It'll be removed after successful post-provisioning, if user set
+          # `instance_has_fip_override` to any value other than "yes".
+          instance_has_fip: true
           flavor_name: "{{ flavor_name_override }}"
           image_name: "{{ image_name_override }}"
           networks: >-
             {{
-              defaults.networks_override
+              networks_override
             }}
           external_network_name: "{{ defaults.external_network_name_override }}"
-      register: tf_output
+      register: tf_initialized_and_applied
       environment:
         TF_IN_AUTOMATION: "true"
+      when: not tfstate_file.stat.exists
+
+    - name: Update previously provisioned instance
+      community.general.terraform:
+        project_path: "{{ tf_project_path }}"
+        state: present
+        force_init: false
+        overwrite_init: false
+        provider_upgrade: false
+        complex_vars: true
+        variables:
+          app_name: "{{ app_name_override }}"
+          instance_name: "{{ instance_name_override }}"
+          instance_index: "{{ instance_index_override }}"
+          security_groups: >-
+            {{
+              security_groups_override
+            }}
+          keypair_name: "{{ public_keypair_name_override }}"
+          # NOTE: Public IP (i.e. `instance_has_fip: true`) is required in
+          # post-provisioning, to configure instance via ssh from a localhost.
+          # It'll be removed after successful post-provisioning, if user set
+          # `instance_has_fip_override` to any value other than "yes".
+          instance_has_fip: true
+          flavor_name: "{{ flavor_name_override }}"
+          image_name: "{{ image_name_override }}"
+          networks: >-
+            {{
+              networks_override
+            }}
+          external_network_name: "{{ defaults.external_network_name_override }}"
+      register: tf_applied
+      environment:
+        TF_IN_AUTOMATION: "true"
+      when: tfstate_file.stat.exists
 
     - name: Store private IP address of the newly provisioned OpenStack VM
       ansible.builtin.set_fact:
-        ipa_client_internal_ip: "{{ tf_output.outputs.instance.value.internal_ip }}"
+        ipa_client_internal_ip: "{{ tf_applied.outputs.instance.value.internal_ip if tfstate_file.stat.exists else tf_initialized_and_applied.outputs.instance.value.internal_ip }}"
 
     - name: Store public IP address of the newly provisioned OpenStack VM
       ansible.builtin.set_fact:
-        ipa_client_public_ip: "{{ tf_output.outputs.instance.value.floating_ip }}"
+        ipa_client_public_ip: "{{ tf_applied.outputs.instance.value.floating_ip if tfstate_file.stat.exists else tf_initialized_and_applied.outputs.instance.value.floating_ip }}"
 
     - name: Store hostname of the newly provisioned OpenStack VM
       ansible.builtin.set_fact:
-        ipa_client_hostname_override: "{{ tf_output.outputs.instance.value.name }}"
+        ipa_client_hostname_override: "{{ tf_applied.outputs.instance.value.name if tfstate_file.stat.exists else tf_initialized_and_applied.outputs.instance.value.internal_ip }}"
 
     - name: Wait for SSH to become available
       ansible.builtin.wait_for:
@@ -147,6 +199,7 @@
         ansible_host: "{{ ipa_client_public_ip }}"
         ansible_user: "{{ 'ubuntu' if 'ubuntu' in image_name_override else 'cloud-user' }}"
         ansible_ssh_private_key_file: "{{ private_keypair_path }}"
+        ansible_ssh_common_args: "-o StrictHostKeyChecking=accept-new"
 
 - name: Install IPA client and enroll into an IPA server's LDAP/DNS services
   hosts: ipa_client
@@ -195,12 +248,14 @@
   gather_facts: false
 
   tasks:
-    - name: Remove unsolicited external IP address used during post-provision configuration
+    - name: Remove any unsolicited external IP addresses used during post-provisioning
       community.general.terraform:
         project_path: "{{ hostvars['localhost']['tf_project_path_fact'] }}"
-        state_file: "{{ hostvars['localhost']['tf_state_file'] }}"
+        state_file: "{{ hostvars['localhost']['tf_project_path_fact'] }}/terraform.tfstate"
         state: present
-        force_init: true
+        force_init: false
+        overwrite_init: false
+        provider_upgrade: false
         complex_vars: true
         variables:
           app_name: "{{ hostvars['localhost']['app_name_override_fact'] }}"
@@ -216,10 +271,10 @@
           image_name: "{{ hostvars['localhost']['image_name_override_fact'] }}"
           networks: >-
             {{
-              defaults.networks_override
+              hostvars['localhost']['networks_override_fact']
             }}
           external_network_name: "{{ hostvars['localhost']['defaults']['external_network_name_override'] }}"
-      register: tf_output
+      register: tf_applied
       environment:
         TF_IN_AUTOMATION: "true"
       when: not hostvars['localhost']['instance_has_fip_override_fact']
@@ -227,7 +282,7 @@
     - name: List created/edited OpenStack resources
       ansible.builtin.debug:
         msg:
-          - "Terraform state file: {{ hostvars['localhost']['tf_state_file'] }}"
-          - "OpenStack VM: {{ hostvars['localhost']['ipa_client_hostname_override'] }}"
+          - "Terraform state file path: {{ hostvars['localhost']['tf_project_path_fact'] }}/terraform.tfstate"
+          - "OpenStack instance name: {{ hostvars['localhost']['ipa_client_hostname_override'] }}"
           - "OpenStack internal IP address: {{ hostvars['localhost']['ipa_client_internal_ip'] }}"
           - "OpenStack public IP address: {{ hostvars['localhost']['ipa_client_public_ip'] if hostvars['localhost']['instance_has_fip_override_fact'] else 'N/A' }}"
