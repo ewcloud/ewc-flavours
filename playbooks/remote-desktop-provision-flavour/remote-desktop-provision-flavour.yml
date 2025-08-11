@@ -1,0 +1,264 @@
+---
+- name: Provision VM via Terraform and authorized OpenStack application credentials
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_prompt:
+    - name: ewc_provider
+      prompt: choose your target EWC provider to be either 'ecmwf' or 'eumetsat'
+      private: false
+
+    - name: tf_project_path
+      prompt: path to terraform module directory
+      private: false
+      default: "~/ewc-tf-module-openstack-compute"
+
+    - name: app_name_override
+      prompt: application name, used as prefix in the full instance name
+      private: false
+
+    - name: instance_name_override
+      prompt: name of the instance, used in the full instance name
+      private: false
+
+    - name: instance_index_override
+      prompt: index or identifier for the instance, used as suffix in the full instance name
+      private: false
+
+    - name: flavor_name_override
+      prompt: name the flavor to use for the instance
+      private: false
+
+    - name: image_name_override
+      prompt: name the image to use for the instance
+      private: false
+
+    - name: public_keypair_name_override
+      prompt: name of public keypair (stored in OpenStack) to be copied into the instance for remote SSH access
+      private: false
+
+    - name: private_keypair_path
+      prompt: path to the local private keypair to use for SSH access to the instance. Or press Enter to accept default
+      private: false
+      default: "~/.ssh/id_rsa"
+
+    - name: networks_override
+      prompt: list of network names to attach the instance to
+      private: false
+
+    - name: security_groups_override
+      prompt: list of security group names to apply to the instance
+      private: false
+
+    - name: instance_has_fip_override
+      prompt: whether to assign a floating IP to the instance. Only `yes` will be accepted to approve
+      private: false
+
+  vars:
+    ecmwf_defaults:
+      external_network_name_override: "external-internet"
+
+    eumetsat_defaults:
+      external_network_name_override: "external"
+
+  pre_tasks:
+    - name: Validate user input
+      ansible.builtin.assert:
+        that:
+          - ewc_provider is defined and ewc_provider != ''
+          - ewc_provider | lower in ['ecmwf', 'eumetsat']
+        fail_msg: "Input validation failed. See README.md for information on required inputs and their format."
+        success_msg: "User input configuration is valid."
+
+    - name: Set remaining default values based on user-specified EWC provider
+      ansible.builtin.set_fact:
+        defaults: >-
+          {{
+            ( ewc_provider == 'ecmwf' ) | ternary(ecmwf_defaults, eumetsat_defaults)
+          }}
+
+    - name: Store user inputs for cleanup and execution summary
+      ansible.builtin.set_fact:
+        tf_project_path_fact: "{{ tf_project_path }}"
+        app_name_override_fact: "{{ app_name_override }}"
+        instance_name_override_fact: "{{ instance_name_override }}"
+        instance_index_override_fact: "{{ instance_index_override }}"
+        flavor_name_override_fact: "{{ flavor_name_override }}"
+        image_name_override_fact: "{{ image_name_override }}"
+        networks_override_fact: "{{ networks_override }}"
+        security_groups_override_fact: "{{ security_groups_override }}"
+        public_keypair_name_override_fact: "{{ public_keypair_name_override }}"
+        instance_has_fip_override_fact: "{{ instance_has_fip_override }}"
+
+  tasks:
+    - name: Clone Terraform module into a designated directory for the instance
+      ansible.builtin.git:
+        repo: git@gitlab.eumetsat.int:HP-EWC/ewc-community-hub/ewcloud/ewc-tf-module-openstack-compute.git
+        key_file: ~/.ssh/eum_id_ed25519.pub
+        dest: "{{ tf_project_path }}"
+        version: quality-assurance
+        update: true
+      environment:
+        GIT_TERMINAL_PROMPT: "0" # reports "terminal prompts disabled" on missing password
+
+    - name: Check if Terraform state file exists
+      ansible.builtin.stat:
+        path: "{{ tf_project_path }}/terraform.tfstate"
+      register: tfstate_file
+
+    - name: Perform initial instance provisioning
+      community.general.terraform:
+        project_path: "{{ tf_project_path }}"
+        state: present
+        force_init: true
+        overwrite_init: false
+        provider_upgrade: false
+        complex_vars: true
+        variables:
+          app_name: "{{ app_name_override }}"
+          instance_name: "{{ instance_name_override }}"
+          instance_index: "{{ instance_index_override }}"
+          security_groups: >-
+            {{
+              security_groups_override
+            }}
+          keypair_name: "{{ public_keypair_name_override }}"
+          # NOTE: Public IP (i.e. `instance_has_fip: true`) is required in
+          # post-provisioning, to configure instance via ssh from a localhost.
+          # It'll be removed after successful post-provisioning, if user set
+          # `instance_has_fip_override` to any value other than "yes".
+          instance_has_fip: true
+          flavor_name: "{{ flavor_name_override }}"
+          image_name: "{{ image_name_override }}"
+          networks: >-
+            {{
+              networks_override
+            }}
+          external_network_name: "{{ defaults.external_network_name_override }}"
+      register: tf_initialized_and_applied
+      environment:
+        TF_IN_AUTOMATION: "true"
+      when: not tfstate_file.stat.exists
+
+    - name: Update previously provisioned instance
+      community.general.terraform:
+        project_path: "{{ tf_project_path }}"
+        state: present
+        force_init: false
+        overwrite_init: false
+        provider_upgrade: false
+        complex_vars: true
+        variables:
+          app_name: "{{ app_name_override }}"
+          instance_name: "{{ instance_name_override }}"
+          instance_index: "{{ instance_index_override }}"
+          security_groups: >-
+            {{
+              security_groups_override
+            }}
+          keypair_name: "{{ public_keypair_name_override }}"
+          # NOTE: Public IP (i.e. `instance_has_fip: true`) is required in
+          # post-provisioning, to configure instance via ssh from a localhost.
+          # It'll be removed after successful post-provisioning, if user set
+          # `instance_has_fip_override` to any value other than "yes".
+          instance_has_fip: true
+          flavor_name: "{{ flavor_name_override }}"
+          image_name: "{{ image_name_override }}"
+          networks: >-
+            {{
+              networks_override
+            }}
+          external_network_name: "{{ defaults.external_network_name_override }}"
+      register: tf_applied
+      environment:
+        TF_IN_AUTOMATION: "true"
+      when: tfstate_file.stat.exists
+
+    - name: Store private IP address of the newly provisioned OpenStack VM
+      ansible.builtin.set_fact:
+        internal_ip: "{{ tf_applied.outputs.instance.value.internal_ip if tfstate_file.stat.exists else tf_initialized_and_applied.outputs.instance.value.internal_ip }}"
+
+    - name: Store public IP address of the newly provisioned OpenStack VM
+      ansible.builtin.set_fact:
+        public_ip: "{{ tf_applied.outputs.instance.value.floating_ip if tfstate_file.stat.exists else tf_initialized_and_applied.outputs.instance.value.floating_ip }}"
+
+    - name: Store hostname of the newly provisioned OpenStack VM
+      ansible.builtin.set_fact:
+        hostname_override: "{{ tf_applied.outputs.instance.value.name if tfstate_file.stat.exists else tf_initialized_and_applied.outputs.instance.value.internal_ip }}"
+
+    - name: Wait for SSH to become available
+      ansible.builtin.wait_for:
+        host: "{{ public_ip }}"
+        port: 22
+        timeout: 300
+
+    - name: Add dynamic host to inventory
+      ansible.builtin.add_host:
+        name: "remote_desktop"
+        ansible_user: "{{ 'ubuntu' if 'ubuntu' in image_name_override else 'cloud-user' }}"
+        ansible_host: "{{ public_ip }}"
+        ansible_ssh_common_args: "-o StrictHostKeyChecking=accept-new"
+
+- name: Configure Remote Desktop server
+  hosts: remote_desktop
+  become: true
+  become_user: root
+  become_method: ansible.builtin.sudo
+
+  vars_prompt:
+    - name: whitelisted_ip_ranges_override
+      prompt: IPv4 ranges (in CIDR format) to be whitelisted in Fail2ban configuration. Or press Enter to skip
+      private: false
+
+  tasks:
+    - name: EWC Ansible Role Remote Desktop
+      ansible.builtin.include_role:
+        name: ewc-ansible-role-remote-desktop-1.0.0
+      vars:
+        whitelisted_ip_ranges: "{{ whitelisted_ip_ranges_override }}"
+
+- name: Cleanup and summarize execution after post-provisioning
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Remove any unsolicited external IP addresses used during post-provisioning
+      community.general.terraform:
+        project_path: "{{ hostvars['localhost']['tf_project_path_fact'] }}"
+        state_file: "{{ hostvars['localhost']['tf_project_path_fact'] }}/terraform.tfstate"
+        state: present
+        force_init: false
+        overwrite_init: false
+        provider_upgrade: false
+        complex_vars: true
+        variables:
+          app_name: "{{ hostvars['localhost']['app_name_override_fact'] }}"
+          instance_name: "{{ hostvars['localhost']['instance_name_override_fact'] }}"
+          instance_index: "{{ hostvars['localhost']['instance_index_override_fact'] }}"
+          security_groups: >-
+            {{
+              hostvars['localhost']['security_groups_override_fact']
+            }}
+          keypair_name: "{{ hostvars['localhost']['public_keypair_name_override_fact'] }}"
+          instance_has_fip: false
+          flavor_name: "{{ hostvars['localhost']['flavor_name_override_fact'] }}"
+          image_name: "{{ hostvars['localhost']['image_name_override_fact'] }}"
+          networks: >-
+            {{
+              hostvars['localhost']['networks_override_fact']
+            }}
+          external_network_name: "{{ hostvars['localhost']['defaults']['external_network_name_override'] }}"
+      register: tf_applied
+      environment:
+        TF_IN_AUTOMATION: "true"
+      when: not hostvars['localhost']['instance_has_fip_override_fact']
+
+    - name: List created/edited OpenStack resources
+      ansible.builtin.debug:
+        msg:
+          - "Terraform state file path: {{ hostvars['localhost']['tf_project_path_fact'] }}/terraform.tfstate"
+          - "OpenStack instance name: {{ hostvars['localhost']['hostname_override'] }}"
+          - "OpenStack internal IP address: {{ hostvars['localhost']['internal_ip'] }}"
+          - "OpenStack public IP address: {{ hostvars['localhost']['public_ip'] if hostvars['localhost']['instance_has_fip_override_fact'] else 'N/A' }}"
