@@ -3,6 +3,18 @@
 All notable changes to this project are documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/ewcloud/ewc-flavours/compare/1.0.0...2.0.0) (2025-08-12)
+
+
+### Code Refactoring
+
+* Added per-playbook subdirs and automation for linting and releasing ([7c43a79](https://github.com/ewcloud/ewc-flavours/commit/7c43a7975bb18ff999c85bd0f85353698472fc0d))
+
+
+### BREAKING CHANGES
+
+* All playbook files migrated from root dir to per-playbook subdirs
+
 # 1.0.0 (2025-06-25)
 
 
