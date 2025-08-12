@@ -1,0 +1,47 @@
+name: Semantic Release
+
+on:
+  workflow_run:
+    workflows: ["Ansible Lint"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify dependency signatures
+        run: npm audit signatures || echo "Some dependency signatures could not be verified!"
+
+      - name: Run semantic-release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push release branch
+        if: env.VERSION != ''
+        run: |
+          git checkout main
+          git pull origin main
+          git checkout -b release/${{ env.VERSION }}
+          git push origin release/${{ env.VERSION }}
+          echo "Created and pushed release branch: release/${{ env.VERSION }}"

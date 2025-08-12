@@ -1,0 +1,15 @@
+---
+- name: Jupyterhub Flavour
+  hosts: all
+  become: true
+  vars:
+    update_vm: true
+  tasks:
+    - name: Update VM
+      ansible.builtin.include_role:
+        name: ewc-ansible-role-update-system-1.0
+      when: update_vm
+
+    - name: Jupyterhub
+      ansible.builtin.include_role:
+        name: ewc-ansible-role-jupyterhub-local-1.0
