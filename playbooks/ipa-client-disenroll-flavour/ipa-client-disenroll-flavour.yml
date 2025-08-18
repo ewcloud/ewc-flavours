@@ -31,7 +31,7 @@
   tasks:
     - name: EWC Ansible Role IPA Client Disenroll
       ansible.builtin.include_role:
-        name: ewc-ansible-role-ipa-client-disenroll-1.0.0
+        name: ewc-ansible-role-ipa-client-disenroll-1.0
       vars:
         ipa_domain: "{{ ipa_domain_override }}"
         ipa_client_hostname: "{{ ipa_client_hostname_override }}"

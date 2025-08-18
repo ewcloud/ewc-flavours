@@ -11,7 +11,7 @@
   tasks:
     - name: EWC Ansible Role IPA Client Enroll
       ansible.builtin.include_role:
-        name: ewc-ansible-role-ipa-client-enroll-1.0.0
+        name: ewc-ansible-role-ipa-client-enroll-1.0
       vars:
         password_allowed_ip_ranges: "{{ password_allowed_ip_ranges_override }}"
         ipa_client_hostname: "{{ inventory_hostname }}"
