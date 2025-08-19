@@ -61,7 +61,7 @@ example:
 ```bash
 ansible-playbook \
   -i inventory.yml \
-  -e '{"whitelisted_ip_ranges": ["10.0.0.0/24","192.168.1.0/24"]}' \
+  -e '{"whitelisted_ip_ranges": ["10.0.0.0/24"]}' \
   ssh-bastion-flavour.yml
 ```
 
