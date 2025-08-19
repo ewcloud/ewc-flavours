@@ -1,75 +1,72 @@
 ---
+- name: Prompt for user inputs
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_prompt:
+    - name: ipa_domain
+      prompt: domain name to be managed by the IPA server
+      private: false
+
+    - name: ipa_server_hostname
+      prompt: hostname of the target vm where the IPA server will be installed
+      private: false
+
+    - name: ipa_admin_username
+      prompt: username of administrator account to replace the default IPA admin
+      private: false
+
+    - name: ipa_admin_password
+      prompt: password of administrator account to replace the default IPA admin (at least 8 characters long)
+      private: true
+      unsafe: true
+      confirm: true
+
+    - name: ipa_admin_givenname
+      prompt: given name of the administrator to replace the default IPA admin (not necessarily a real person's name)
+      private: false
+
+    - name: ipa_admin_surname
+      prompt: surname of the administrator to replace the default IPA admin (not necessarily a real person's name)
+      private: false
+
+    - name: os_network_name
+      prompt: Openstack network to which the target virtual machine has access to
+      private: false
+
+    - name: os_security_group_name
+      prompt: OpenStack security group containing all firewall rules required by the IPA server/client communication
+      private: false
+
+  tasks:
+    - name: Store user input as localhost facts
+      ansible.builtin.set_fact:
+        ipa_domain_fact: "{{ ipa_domain }}"
+        ipa_server_hostname_fact: "{{ ipa_server_hostname }}"
+        ipa_admin_password_fact: "{{ ipa_admin_password }}"
+        ipa_admin_username_fact: "{{ ipa_admin_username }}"
+        ipa_admin_givenname_fact: "{{ ipa_admin_givenname }}"
+        ipa_admin_surname_fact: "{{ ipa_admin_surname }}"
+        os_network_name_fact: "{{ os_network_name }}"
+        os_security_group_name_fact: "{{ os_security_group_name }}"
+
 - name: Install IPA server
   hosts: all
   become: true
   become_user: root
   become_method: ansible.builtin.sudo
 
-  vars_prompt:
-    - name: ipa_domain_override
-      prompt: domain name to be managed by the IPA server
-      private: false
-
-    - name: ipa_server_hostname_override
-      prompt: hostname of the target vm where the IPA server will be installed
-      private: false
-
-    - name: ipa_admin_username_override
-      prompt: username of administrator account to replace the default IPA admin
-      private: false
-
-    - name: ipa_admin_password_override
-      prompt: password of administrator account to replace the default IPA admin (at least 8 characters long)
-      private: true
-      unsafe: true
-      confirm: true
-
-    - name: ipa_admin_givenname_override
-      prompt: given name of the administrator to replace the default IPA admin (needs not to belong to a physical person)
-      private: false
-
-    - name: ipa_admin_surname_override
-      prompt: surname of the administrator to replace the default IPA admin (needs not to belong to a physical person)
-      private: false
-
-    - name: os_network_name_override
-      prompt: Openstack network to which the target virtual machine has access to
-      private: false
-
-    - name: os_subnet_name_override
-      prompt: Openstack subnet in which the target virtual machine is running
-      private: false
-
-    - name: os_subnet_cidr_override
-      prompt: IP range (in CIDR format) that spans the OpenStack subnet in which the target virtual machines is running
-      private: false
-
-    - name: os_security_group_name_override
-      prompt: OpenStack security group containing all firewall rules required by the IPA server/client communication
-      private: false
-
-    - name: os_subnet_dns_nameserver_ip_default_override
-      prompt: default DNS nameserver IPV4 address registered on the OpenStack subnet where the IPA server will run
-      private: false
-
-    - name: os_subnet_dns_nameserver_ip_fallback_override
-      prompt: fallback DNS nameserver IPV4 address registered on the OpenStack subnet where the IPA server will run
-      private: false
-
   tasks:
     - name: EWC Ansible Role IPA Server
       ansible.builtin.include_role:
         name: ewc-ansible-role-ipa-server-1.0
       vars:
-        ipa_domain: "{{ ipa_domain_override }}"
-        ipa_server_hostname: "{{ ipa_server_hostname_override }}"
-        ipa_admin_password: "{{ ipa_admin_password_override }}"
-        ipa_admin_username: "{{ ipa_admin_username_override }}"
-        ipa_admin_givenname: "{{ ipa_admin_givenname_override }}"
-        ipa_admin_surname: "{{ ipa_admin_surname_override }}"
-        os_network_name: "{{ os_network_name_override }}"
-        os_subnet_name: "{{ os_subnet_name_override }}"
-        os_subnet_cidr: "{{ os_subnet_cidr_override }}"
-        os_security_group_name: "{{ os_security_group_name_override }}"
-        os_subnet_dns_nameserver_ip_default: "{{ os_subnet_dns_nameserver_ip_default_override }}"
-        os_subnet_dns_nameserver_ip_fallback: "{{ os_subnet_dns_nameserver_ip_fallback_override }}"
+        ipa_domain: "{{ hostvars['localhost']['ipa_domain'] }}"
+        ipa_server_hostname: "{{ hostvars['localhost']['ipa_server_hostname']}}"
+        ipa_admin_password: "{{ hostvars['localhost']['ipa_admin_password'] }}"
+        ipa_admin_username: "{{ hostvars['localhost']['ipa_admin_username'] }}"
+        ipa_admin_givenname: "{{ hostvars['localhost']['ipa_admin_givenname'] }}"
+        ipa_admin_surname: "{{ hostvars['localhost']['ipa_admin_surname'] }}"
+        os_network_name: "{{ hostvars['localhost']['os_network_name'] }}"
+        os_security_group_name: "{{ hostvars['localhost']['os_security_group_name'] }}"

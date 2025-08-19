@@ -1,15 +1,21 @@
 # SSH bastion flavour
+The [SSH](https://en.wikipedia.org/wiki/Secure_Shell) proxy or bastion server
+is a barrier between your internal machines (without public or floating IPs)
+and the public internet. With the SSH proxy, you'll have an extra layer of 
+security on top of your instances. It's equipped with 
+[Fail2ban](https://github.com/fail2ban/fail2ban),
+intrusion prevention software designed to prevent brute-force attacks.
 
-This repository contains a configuration template
+This subdirectory contains a configuration template
 (i.e. an [Ansible Playbook](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html))
 to customize your environment in the
 [European Weather Cloud (EWC)](https://europeanweather.cloud/).
 
 The template is designed to:
 
-* Configure pre-existing RockyLinux 8 or RockyLinux 9 virtual machines (with
-public IP address), as entrypoint for users who wish to reach private
-EWC networks from the public internet via SSH.
+* Configure a pre-existing virtual machine running RockyLinux, with public IP 
+address, and a minimum recommended 4GB of RAM, as entrypoint for users who 
+wish to reach private EWC networks, from the public internet, via SSH.
 
 ## Usage
 
@@ -25,9 +31,9 @@ ewcloud:
     ssh_bastion:
       ansible_python_interpreter: /usr/bin/python3
       ansible_host: <add the IPV4 address of the target host>
-      ansible_ssh_private_key_file: <add the path to local SSH RSA private key file>
-      ansible_user: <add the username which owns the SSH RSA private key >
-
+      ansible_ssh_private_key_file: <add the path to local SSH private key file>
+      ansible_user: cloud-user
+      ansible_ssh_common_args: -o StrictHostKeyChecking=accept-new
 ```
 
 ### 2. Configure and apply the template
@@ -48,12 +54,14 @@ ansible-playbook -i inventory.yml ssh-bastion-flavour.yml
 [official Ansible documentation](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html).
 
 You can also run in non-interactive mode by passing the
-`--extra-vars` or `-e` flag, followed by a map of  key-value pairs; one for each and every available input (see [inputs section](#inputs) below):
+`--extra-vars` or `-e` flag, followed by a map of  key-value pairs; one for
+each and every available input (see [inputs section](#inputs) below). For
+example:
 
 ```bash
 ansible-playbook \
   -i inventory.yml \
-  -e '{"whitelisted_ip_ranges_override": ["10.0.0.0/24","192.168.1.0/24"]}' \
+  -e '{"whitelisted_ip_ranges": ["10.0.0.0/24","192.168.1.0/24"]}' \
   ssh-bastion-flavour.yml
 ```
 
@@ -61,4 +69,17 @@ ansible-playbook \
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
-| whitelisted_ip_ranges_override | IPv4 ranges (in CIDR format) to be whitelisted in Fail2ban configuration. Example: `["10.0.0.0/24","192.168.1.0/24"]` | `list(string)` | n/a | no |
+| whitelisted_ip_ranges | IPv4 ranges (in CIDR format) to be whitelisted in Fail2ban configuration. When in doubt, do not set. Example: `['10.0.0.0/24','192.168.1.0/24']` | `list(string)` | n/a | no |
+
+## Requirements
+
+> ⚠️ Only RockyLinux 9.5 and RockyLinux 8.10 instances are currently supported due
+to constrains imposed by the required ewc-ansible-role-ssh-bastion Ansible
+Role.
+
+> 💡 A VM plan with at least 4GB of RAM is recommended for successful setup and
+stable operation.
+
+| Name | Version | Package Info |
+|------|---------|-------|
+| ewc-ansible-role-ssh-bastion | 1.3 |  https://github.com/ewcloud/ewc-ansible-role-ssh-bastion |

@@ -1,5 +1,5 @@
 # IPA client enroll flavour
-A configuration template
+This subdirectory contains a configuration template
 (i.e. an [Ansible Playbook](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html))
 to customize your environment in the
 [European Weather Cloud (EWC)](https://europeanweather.cloud/).
@@ -16,6 +16,9 @@ The template is designed to:
 ## Usage
 
 ### 1. Specify the target host and SSH credentials
+> 💡 To find out which is the default user for your chosen VM image,
+checkout the [official EWC documentation](https://confluence.ecmwf.int/display/EWCLOUDKB/EWC+-+VM+images+and+default+users).
+
 Create an inventory file to specify address/credentials that Ansible should use
 to reach the virtual machine you wish to configure:
 
@@ -27,8 +30,9 @@ ewcloud:
     ipa_client:
       ansible_python_interpreter: /usr/bin/python3
       ansible_host: <add the IPV4 address of the target host>
-      ansible_ssh_private_key_file: <add the path to local SSH RSA private key file>
-      ansible_user: <add the username which owns the SSH RSA private key >
+      ansible_ssh_private_key_file: <add the path to local SSH private key file>
+      ansible_user: <add the default user according to your chosen VM image>
+      ansible_ssh_common_args: -o StrictHostKeyChecking=accept-new
 
 ```
 
@@ -50,16 +54,20 @@ ansible-playbook -i inventory.yml ipa-client-enroll-flavour.yml
 [official Ansible documentation](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html).
 
 You can also run in non-interactive mode by passing the
-`--extra-vars` or `-e` flag, followed by a map of  key-value pairs; one for each and every available input (see [inputs section](#inputs) below):
+`--extra-vars` or `-e` flag, followed by a map of  key-value pairs; one for
+each and every available input (see [inputs section](#inputs) below). For
+example:
 
 ```bash
 ansible-playbook \
   -i inventory.yml \
   -e '{
-        "password_allowed_ip_ranges_override": ["10.0.0.0/24","192.168.1.0/24"],
-        #  ...
-        # all remaining input overrides
-        # ...
+        "ipa_client_hostname": "ipa-client-1",
+        "ipa_domain": "eumetsat.sandbox.ewc",
+        "ipa_server_hostname": "ipa-server-1",
+        "ipa_admin_username": "ipaadmin",
+        "ipa_admin_password": "my-secret-password",
+        "password_allowed_ip_ranges": ["10.0.0.0/24", "192.168.1.0/24"]
     }' \
   ipa-client-enroll-flavour.yml
 ```
@@ -68,9 +76,18 @@ ansible-playbook \
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
-| ipa_client_hostname_override | hostname of the target vm where the IPA client will be installed. Example: `<openstack instance name>` | `string`| n/a | yes |
-| ipa_domain_override | domain name managed by the IPA server. Example: `<memberstate>-<organization>-<projectname>.ewc` | `string` | n/a | yes |
-| ipa_server_hostname_override | hostname of the IPA server. Example: `ipa-server-1` | `string`| n/a | yes |
-| ipa_admin_username_override | username of the administrator account from the IPA server | `string` | n/a | yes |
-| ipa_admin_password_override | password of the administrator account from the IPA server | `string` | n/a | yes |
-| password_allowed_ip_ranges_override | IP ranges (in CIDR format) to be allowed for password access in SSHD configuration. Example: `["10.0.0.0/24","192.168.1.0/24"]["10.0.0.0/24","192.168.1.0/24"]` | `list(string)` | n/a | yes |
+| ipa_client_hostname | hostname of the target vm where the IPA client will be installed. Example: `ipa-client-1` | `string`| n/a | yes |
+| ipa_domain | domain name managed by the IPA server. Example: `eumetsat.sandbox.ewc` | `string` | n/a | yes |
+| ipa_server_hostname | hostname of the IPA server. Example: `ipa-server-1` | `string`| n/a | yes |
+| ipa_admin_username | username of the administrator account from the IPA server. Example: `ipaadmin` | `string` | n/a | yes |
+| ipa_admin_password | password of the administrator account from the IPA server. Example: `my-secret-password` | `string` | n/a | yes |
+| password_allowed_ip_ranges | IP ranges (in CIDR format) to be allowed for password access in SSHD configuration. When in doubt, add only IP addresses of instances you know and trust. Example: `['10.0.0.0/24','192.168.1.0/24']` | `list(string)` | n/a | yes |
+
+## Requirements
+> ⚠️ Only Ubuntu 22.04 and RockyLinux 8.10 VM images are currently supported.
+This is due to constrains imposed by the required
+ewc-ansible-role-ipa-client-enroll Ansible Role.
+
+| Name | Version | Package Info |
+|------|---------|-------|
+| ewc-ansible-role-ipa-client-enroll | 1.0 |  https://github.com/ewcloud/ewc-ansible-role-ipa-client-enroll |

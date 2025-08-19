@@ -1,18 +1,28 @@
 ---
+- name: Prompt for user inputs
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_prompt:
+    - name: whitelisted_ip_ranges
+      prompt: IPv4 ranges (in CIDR format) to be whitelisted in Fail2ban configuration. When in doubt, do not set. Press Enter to skip
+      private: false
+
+  tasks:
+    - name: Store user input as localhost facts
+      ansible.builtin.set_fact:
+        whitelisted_ip_ranges_fact: "{{ whitelisted_ip_ranges }}"
+
 - name: Configure Remote Desktop server
   hosts: all
   become: true
   become_user: root
   become_method: ansible.builtin.sudo
 
-  vars_prompt:
-    - name: whitelisted_ip_ranges_override
-      prompt: IPv4 ranges (in CIDR format) to be whitelisted in Fail2ban configuration. Or press Enter to skip
-      private: false
-
   tasks:
     - name: EWC Ansible Role Remote Desktop
       ansible.builtin.include_role:
         name: ewc-ansible-role-remote-desktop-1.0
       vars:
-        whitelisted_ip_ranges: "{{ whitelisted_ip_ranges_override }}"
+        whitelisted_ip_ranges: "{{ hostvars['localhost']['whitelisted_ip_ranges_fact'] }}"

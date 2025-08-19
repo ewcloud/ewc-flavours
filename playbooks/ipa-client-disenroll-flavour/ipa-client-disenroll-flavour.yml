@@ -1,40 +1,54 @@
 ---
-- name: Disenroll from an IPA server's LDAP/DNS services
-  hosts: all
-  become: true
-  become_user: root
-  become_method: ansible.builtin.sudo
+- name: Prompt for user inputs
+  hosts: localhost
+  connection: local
+  gather_facts: false
 
   vars_prompt:
-    - name: ipa_domain_override
+    - name: ipa_domain
       prompt: domain name managed by the IPA server
       private: false
 
-    - name: ipa_client_hostname_override
+    - name: ipa_client_hostname
       prompt: hostname of the target vm to be disenrolled from the IPA server
       private: false
 
-    - name: ipa_server_hostname_override
+    - name: ipa_server_hostname
       prompt: hostname of the IPA server
       private: false
 
-    - name: ipa_admin_username_override
+    - name: ipa_admin_username
       prompt: username of the administrator account from the IPA server
       private: false
 
-    - name: ipa_admin_password_override
+    - name: ipa_admin_password
       prompt: password of the administrator account from the IPA server
       private: true
       unsafe: true
       confirm: false
 
   tasks:
+    - name: Store user input as localhost facts
+      ansible.builtin.set_fact:
+        ipa_domain_fact: "{{ ipa_domain }}"
+        ipa_client_hostname_fact: "{{ ipa_client_hostname }}"
+        ipa_server_hostname_fact: "{{ ipa_server_hostname }}"
+        ipa_admin_username_fact: "{{ ipa_admin_username }}"
+        ipa_admin_password_fact: "{{ ipa_admin_password }}"
+
+- name: Disenroll from an IPA server's LDAP/DNS services
+  hosts: all
+  become: true
+  become_user: root
+  become_method: ansible.builtin.sudo
+
+  tasks:
     - name: EWC Ansible Role IPA Client Disenroll
       ansible.builtin.include_role:
         name: ewc-ansible-role-ipa-client-disenroll-1.0
       vars:
-        ipa_domain: "{{ ipa_domain_override }}"
-        ipa_client_hostname: "{{ ipa_client_hostname_override }}"
-        ipa_server_hostname: "{{ ipa_server_hostname_override }}"
-        ipa_admin_username: "{{ ipa_admin_username_override }}"
-        ipa_admin_password: "{{ ipa_admin_password_override }}"
+        ipa_domain: "{{ hostvars['localhost']['ipa_domain_fact'] }}"
+        ipa_client_hostname: "{{ hostvars['localhost']['ipa_client_hostname_fact'] }}"
+        ipa_server_hostname: "{{ hostvars['localhost']['ipa_server_hostname_fact'] }}"
+        ipa_admin_username: "{{ hostvars['localhost']['ipa_admin_username_fact'] }}"
+        ipa_admin_password: "{{ hostvars['localhost']['ipa_admin_password_fact'] }}"

@@ -1,45 +1,60 @@
 ---
+- name: Prompt for user inputs
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_prompt:
+    - name: ipa_client_hostname
+      prompt: hostname of the target vm where the IPA client will be installed
+      private: false
+
+    - name: ipa_domain
+      prompt: domain name managed by the IPA server
+      private: false
+
+    - name: ipa_server_hostname
+      prompt: hostname of the IPA server
+      private: false
+
+    - name: ipa_admin_username
+      prompt: username of the administrator account from the IPA server
+      private: false
+
+    - name: ipa_admin_password
+      prompt: password of the administrator account from the IPA server
+      private: true
+      unsafe: true
+      confirm: false
+
+    - name: password_allowed_ip_ranges
+      prompt: IP ranges (in CIDR format) to be allowed for password access in SSHD configuration. When in doubt, add only IP addresses of instances you know and trust.
+      private: false
+
+  tasks:
+    - name: Store user input as localhost facts
+      ansible.builtin.set_fact:
+        ipa_client_hostname_fact: "{{ ipa_client_hostname }}"
+        ipa_domain_fact: "{{ ipa_domain }}"
+        ipa_server_hostname_fact: "{{ ipa_server_hostname }}"
+        ipa_admin_username_fact: "{{ ipa_admin_username }}"
+        ipa_admin_password_fact: "{{ ipa_admin_password }}"
+        password_allowed_ip_ranges_fact: "{{ password_allowed_ip_ranges }}"
+
 - name: Install IPA client and enroll into an IPA server's LDAP/DNS services
   hosts: all
   become: true
   become_user: root
   become_method: ansible.builtin.sudo
 
-  vars_prompt:
-    - name: ipa_client_hostname_override
-      prompt: hostname of the target vm where the IPA client will be installed
-      private: false
-
-    - name: ipa_domain_override
-      prompt: domain name managed by the IPA server
-      private: false
-
-    - name: ipa_server_hostname_override
-      prompt: hostname of the IPA server
-      private: false
-
-    - name: ipa_admin_username_override
-      prompt: username of the administrator account from the IPA server
-      private: false
-
-    - name: ipa_admin_password_override
-      prompt: password of the administrator account from the IPA server
-      private: true
-      unsafe: true
-      confirm: false
-
-    - name: password_allowed_ip_ranges_override
-      prompt: IP ranges (in CIDR format) to be allowed for password access in SSHD configuration.
-      private: false
-
   tasks:
     - name: EWC Ansible Role IPA Client Enroll
       ansible.builtin.include_role:
         name: ewc-ansible-role-ipa-client-enroll-1.0
       vars:
-        ipa_client_hostname: "{{ ipa_client_hostname_override }}"
-        ipa_domain: "{{ ipa_domain_override }}"
-        ipa_server_hostname: "{{ ipa_server_hostname_override }}"
-        ipa_admin_username: "{{ ipa_admin_username_override }}"
-        ipa_admin_password: "{{ ipa_admin_password_override }}"
-        password_allowed_ip_ranges: "{{ password_allowed_ip_ranges_override }}"
+        ipa_client_hostname: "{{ hostvars['localhost']['ipa_client_hostname_fact'] }}"
+        ipa_domain: "{{ hostvars['localhost']['ipa_domain_fact'] }}"
+        ipa_server_hostname: "{{ hostvars['localhost']['ipa_server_hostname_fact'] }}"
+        ipa_admin_username: "{{ hostvars['localhost']['ipa_admin_username_fact'] }}"
+        ipa_admin_password: "{{ hostvars['localhost']['ipa_admin_password_fact'] }}"
+        password_allowed_ip_ranges: "{{ hostvars['localhost']['password_allowed_ip_ranges_fact'] }}"

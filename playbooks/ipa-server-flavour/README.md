@@ -1,20 +1,23 @@
 # IPA server flavour
-A configuration template
+IPA (acronym for identity, policy and audit) and its open-source 
+implementation [FreeIPA](https://www.freeipa.org/page/Main_Page), serve
+both as a user management system and as your internal DNS nameserver.
+
+This subdirectory contains a configuration template
 (i.e. an [Ansible Playbook](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html))
 to customize your environment in the
 [European Weather Cloud (EWC)](https://europeanweather.cloud/).
 
 The template is designed to:
-
-* Validate that network/subnet configuration in the EWC tenancy, that is OpenStack
-security group rules, is suitable for IPA server operation (e.g. open ports for
-DNS, LDAP, Kerberos, HTTP/HTTPS, SSH, etc.)
-* Check that target host has the recommended RAM availability
-* Configure a pre-existing RockyLinux 8 or RockyLinux 9 virtual machine such that it:
-    * Provides DNS resolutions for discovery of resources (i.e. other virtual machines)
-    * Enables centralized user and credentials creation/edition/deletion/authentication
-    * Allows centralized authorization between users and resources
-* Automatically update the underlying subnet DNS nameserver to point to the newly configured IPA server
+* Validate that network/subnet configuration in the EWC tenancy
+* Configure a pre-existing virtual machine running RockyLinux version 8 or 9,
+and with a minimum recommended 4GB of RAM, such that it:
+  * Provides DNS resolutions for discovery of resources (i.e. other virtual
+  machines)
+  * Enables centralized user and credentials creation/edition/deletion/authentication
+  * Allows centralized authorization between users and resources
+* Automatically update the underlying subnet DNS nameserver to point to the
+newly configured IPA server
 
 ## Usage
 
@@ -30,9 +33,9 @@ ewcloud:
     ipa_server:
       ansible_python_interpreter: /usr/bin/python3
       ansible_host: <add the IPV4 address of the target host>
-      ansible_ssh_private_key_file: <add the path to local SSH RSA private key file>
-      ansible_user: <add the username which owns the SSH RSA private key >
-
+      ansible_ssh_private_key_file: <add the path to local SSH private key file>
+      ansible_user: cloud-user 
+      ansible_ssh_common_args: -o StrictHostKeyChecking=accept-new
 ```
 
 ### 2. Configure and apply the template
@@ -53,32 +56,47 @@ ansible-playbook -i inventory.yml ipa-server-flavour.yml
 [official Ansible documentation](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html).
 
 You can also run in non-interactive mode by passing the
-`--extra-vars` or `-e` flag, followed by a map of  key-value pairs; one for each and every available input (see [inputs section](#inputs) below):
+`--extra-vars` or `-e` flag, followed by a map of  key-value pairs; one for
+each and every available input (see [inputs section](#inputs) below). For
+example:
 
 ```bash
 ansible-playbook \
   -i inventory.yml \
-  -e ipa_server_hostname_override=ipa-server-1 \
-  # 
-  # all remaining input overrides
-  # ...
+  -e '{
+      "ipa_domain": "eumetsat.sandbox.ewc",
+      "ipa_server_hostname": "ipa-server-1",
+      "ipa_admin_username": "ipaadmin",
+      "ipa_admin_password": "my-secret-password",
+      "ipa_admin_givenname": "EWC",
+      "ipa_admin_surname": "IPAADMIN",
+      "os_network_name": "private",
+      "os_security_group_name": "ipa"
+    }' \
   ipa-server-flavour.yml
-  
 ```
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
-| ipa_domain_override | domain name to be managed by the IPA server. Example: `<memberstate>-<organization>-<projectname>.ewc` | `string` | n/a | yes |
-| ipa_server_hostname_override | hostname of the target vm where the IPA server will be installed. Example: `ipa-server-1` | `string`| n/a | yes |
-| ipa_admin_username_override | username of administrator account to replace the default IPA admin | `string` | n/a | yes |
-| ipa_admin_password_override | password of administrator account to replace the default IPA admin | `string` | n/a | yes |
-| ipa_admin_givenname_override | given name of the administrator to replace the default IPA admin (needs not be a physical person). Example: `EWC` | `string` | n/a | yes |
-| ipa_admin_surname_override | surname of the administrator to replace the default IPA admin (needs not to belong to a physical person). Example: `IPAADMIN` | `string` | n/a | yes |
-| os_network_name_override | OpenStack network to which the target virtual machine has access to. Example: `private` | `string` | n/a | yes |
-| os_subnet_name_override | OpenStack subnet in which the target virtual machine is running. Example: `private subnet` | `string` | n/a | yes |
-| os_subnet_cidr_override | IP range (in CIDR format) that spans the OpenStack subnet in which the target virtual machines is running. Example: `10.0.0.0/24` | `string` |n/a  | yes |
-| os_security_group_name_override | OpenStack security group containing all firewall rules required by the IPA server/client communication. Example: `ipa`  | `string` | n/a | yes |
-| os_subnet_dns_nameserver_ip_default_override | default DNS nameserver IPV4 address registered on the OpenStack subnet where the IPA server will run. Example: `1.1.1.1` | `string` | n/a | yes |
-| os_subnet_dns_nameserver_ip_fallback_override | fallback DNS nameserver IPV4 address registered on the OpenStack subnet where the IPA server will run. Example: `8.8.8.8` | `string` | n/a  | yes |
+| ipa_domain | domain name to be managed by the IPA server. Example: `eumetsat.sandbox.ewc` | `string` | n/a | yes |
+| ipa_server_hostname | hostname of the target vm where the IPA server will be installed. Example: `ipa-server-1` | `string`| n/a | yes |
+| ipa_admin_username | username of administrator account to replace the default IPA admin. Example: `ipaadmin` | `string` | n/a | yes |
+| ipa_admin_password | password of administrator account to replace the default IPA admin. Example: `my-secret-password` | `string` | n/a | yes |
+| ipa_admin_givenname | given name of the administrator to replace the default IPA admin (not necessarily a real person's name). Example: `EWC` | `string` | n/a | yes |
+| ipa_admin_surname | surname of the administrator to replace the default IPA admin (not necessarily a real person's name). Example: `IPAADMIN` | `string` | n/a | yes |
+| os_network_name | OpenStack network to which the target virtual machine has access to. Example: `private` | `string` | n/a | yes |
+| os_security_group_name | OpenStack security group containing all firewall rules required by the IPA server/client communication. Example: `ipa`  | `string` | n/a | yes |
+
+## Requirements
+> ⚠️ Only RockyLinux 9.6 and RockyLinux 8.10 VM images are currently supported.
+This is due to constrains imposed by the required ewc-ansible-role-ipa-server
+Ansible Role.
+
+> 💡 A VM plan with at least 4GB of RAM is recommended for successful setup and
+stable operation. 
+
+| Name | Version | Package Info |
+|------|---------|-------|
+| ewc-ansible-role-ipa-server | 1.0 |  https://github.com/ewcloud/ewc-ansible-role-ipa-server |
