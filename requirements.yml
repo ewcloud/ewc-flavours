@@ -1,23 +1,28 @@
 ---
 # Ansible Requirements
+# TODO: Update version attributes to match MAJOR.MINOR.PATCH version (i.e. the git tag) of the roles,
+#       once available. Note that pinning down to the PATCH number in the `version` attribute while
+#       referencing only the MINOR version in the role name translates to Ansible Playbooks automatically
+#       import the latest fixes for Ansible Roles they depend on, assuming older versions of said Ansible
+#       Roles are not cached locally, in the `./roles` or `~/.ansible/roles` directories for example.
 roles:
-  - name: ewc-ansible-role-update-system
+  - name: ewc-ansible-role-update-system-1.0
     src: https://github.com/ewcloud/ewc-ansible-role-update-system.git
     version: main
 
-  - name: ewc-ansible-role-mars-client
+  - name: ewc-ansible-role-mars-client-1.0
     src: https://github.com/ewcloud/ewc-ansible-role-mars-client.git
     version: main
 
-  - name: ewc-ansible-role-conda
+  - name: ewc-ansible-role-conda-1.0
     src: https://github.com/ewcloud/ewc-ansible-role-conda.git
     version: main
 
-  - name: ewc-ansible-role-ecmwf-toolbox
+  - name: ewc-ansible-role-ecmwf-toolbox-1.0
     src: https://github.com/ewcloud/ewc-ansible-role-ecmwf-toolbox.git
     version: main
 
-  - name: ewc-ansible-role-jupyterhub-local
+  - name: ewc-ansible-role-jupyterhub-local-1.0
     src: https://github.com/ewcloud/ewc-ansible-role-jupyterhub-local.git
     version: main
 

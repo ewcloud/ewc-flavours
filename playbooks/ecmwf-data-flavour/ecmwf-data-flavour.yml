@@ -1,18 +1,19 @@
 ---
-- hosts: all
-  become: yes
+- name: ECMWF Data Flavour
+  hosts: all
+  become: true
   vars:
-    update_vm: yes
+    update_vm: true
   tasks:
     - name: Update VM
       ansible.builtin.include_role:
-        name: ewc-ansible-role-update-system
+        name: ewc-ansible-role-update-system-1.0
       when: update_vm
 
     - name: Mars client
       ansible.builtin.include_role:
-        name: ewc-ansible-role-mars-client
+        name: ewc-ansible-role-mars-client-1.0
 
     - name: ECMWF Toolbox
       ansible.builtin.include_role:
-        name: ewc-ansible-role-ecmwf-toolbox
+        name: ewc-ansible-role-ecmwf-toolbox-1.0

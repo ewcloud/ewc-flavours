@@ -1,0 +1,39 @@
+name: Ansible Lint
+
+on:
+  push:
+    paths:
+      - '**/*.yml'
+  pull_request:
+    paths:
+      - '**/*.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        python-version: ['3.9']
+    env:
+      ANSIBLE_PATH: ./playbooks
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: pip install ansible~=8.7 ansible-lint~=6.22
+
+      - name: Run ansible-lint
+        run: ansible-lint --offline ${{ env.ANSIBLE_PATH }}
