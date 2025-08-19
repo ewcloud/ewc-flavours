@@ -63,7 +63,7 @@
         name: ewc-ansible-role-ipa-server-1.0
       vars:
         ipa_domain: "{{ hostvars['localhost']['ipa_domain'] }}"
-        ipa_server_hostname: "{{ hostvars['localhost']['ipa_server_hostname']}}"
+        ipa_server_hostname: "{{ hostvars['localhost']['ipa_server_hostname'] }}"
         ipa_admin_password: "{{ hostvars['localhost']['ipa_admin_password'] }}"
         ipa_admin_username: "{{ hostvars['localhost']['ipa_admin_username'] }}"
         ipa_admin_givenname: "{{ hostvars['localhost']['ipa_admin_givenname'] }}"
