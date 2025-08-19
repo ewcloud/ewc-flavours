@@ -28,7 +28,7 @@
       confirm: false
 
     - name: password_allowed_ip_ranges
-      prompt: IP ranges (in CIDR format) to be allowed for password access in SSHD configuration. When in doubt, add only IP addresses of instances you know and trust.
+      prompt: IP addresses or IP ranges (in CIDR format) to be allowed for password access in SSHD configuration. When in doubt, add only IP addresses you know and trust. Press Enter to accept default value [['10.0.0.0/8','172.16.0.0/12','192.168.0.0/16']]
       private: false
 
   tasks:

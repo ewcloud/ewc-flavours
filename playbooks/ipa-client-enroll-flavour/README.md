@@ -66,8 +66,7 @@ ansible-playbook \
         "ipa_domain": "eumetsat.sandbox.ewc",
         "ipa_server_hostname": "ipa-server-1",
         "ipa_admin_username": "ipaadmin",
-        "ipa_admin_password": "my-secret-password",
-        "password_allowed_ip_ranges": ["10.0.0.0/24", "192.168.1.0/24"]
+        "ipa_admin_password": "my-secret-password"
     }' \
   ipa-client-enroll-flavour.yml
 ```
@@ -81,7 +80,7 @@ ansible-playbook \
 | ipa_server_hostname | hostname of the IPA server. Example: `ipa-server-1` | `string`| n/a | yes |
 | ipa_admin_username | username of the administrator account from the IPA server. Example: `ipaadmin` | `string` | n/a | yes |
 | ipa_admin_password | password of the administrator account from the IPA server. Example: `my-secret-password` | `string` | n/a | yes |
-| password_allowed_ip_ranges | IP ranges (in CIDR format) to be allowed for password access in SSHD configuration. When in doubt, add only IP addresses of instances you know and trust. Example: `['10.0.0.0/24','192.168.1.0/24']` | `list(string)` | n/a | yes |
+| password_allowed_ip_ranges | IP addresses or IP ranges (in CIDR format) to be allowed for password access in SSHD configuration. When in doubt, add only IP addresses you know and trust. Example: `['10.0.0.0/24','192.168.1.0/24']` | `list(string)` | `['10.0.0.0/8','172.16.0.0/12','192.168.0.0/16']` | no |
 
 ## Requirements
 > ⚠️ Only Ubuntu 22.04 and RockyLinux 8.10 VM images are currently supported.
