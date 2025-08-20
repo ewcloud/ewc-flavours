@@ -90,7 +90,7 @@ ansible-playbook \
 | os_security_group_name | OpenStack security group containing all firewall rules required by the IPA server/client communication. Example: `ipa`  | `string` | n/a | yes |
 
 ## Requirements
-> ⚠️ Only RockyLinux 9.6 and RockyLinux 8.10 VM images are currently supported.
+> ⚠️ Only RockyLinux 9.5 and RockyLinux 8.10 VM images are currently supported.
 This is due to constrains imposed by the required ewc-ansible-role-ipa-server
 Ansible Role.
 
