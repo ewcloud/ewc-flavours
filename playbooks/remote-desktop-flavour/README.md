@@ -12,15 +12,19 @@ efficient and intuitive desktop operation.
 
 Special for tenant users needing remote graphical access in their EWC 
 environment, this template simplifies the setup of basic cloud development
-solution. Follow the [instructions below](#usage) to get started.
+solution. 
+
+If you need an example on how to connect to the remote desktop after the
+initial setup is complete, checkout the 
+[official EWC documentation](https://confluence.ecmwf.int/display/EWCLOUDKB/EUMETSAT+tenancy%3A+Default+setup).
 
 ## Functionality
 The template is designed to:
 - Configure a pre-existing Rocky Linux virtual machine (minimum 4GB RAM recommended) with 
 the [MATE desktop environment](https://mate-desktop.org/).
 - Install and set up X2Go for secure remote desktop access over varying network conditions.
-- Enable end-users to interact with the VM through a graphical interface using the X2Go client 
-application.
+- Enable end-users to interact with the VM through a graphical interface using the 
+[X2Go client](https://wiki.x2go.org/doku.php/doc:installation:x2goclient) application.
 
 
 ## Usage
@@ -71,21 +75,6 @@ ansible-playbook \
   -e '{"whitelisted_ip_ranges": ["10.0.0.0/24"]}' \
   remote-desktop-flavour.yml
 ```
-
-### 3. Install the local client and connect to your remote desktop
->⚠️ When configuring a connection, be sure to select "MATE" (instead of
-"KDE" or any other options) in the `Session Type` drop-down list, towards the
-bottom of the `Session` tab. This is required for the local client to correctly
-communicate with your remote desktop.
-
-Install the remote desktop client on Microsoft Window, Mac OS or Linux by
-following the links on the [official X2Go installation page](https://wiki.x2go.org/doku.php/doc:installation:x2goclient). Then follow the [official X2Go client usage page](https://wiki.x2go.org/doku.php/doc:usage:x2goclient)
-if you do not know how to configure a new session. 
-
-For a session creation
-example, representative of a typical EWC environment, checkout the Remote
-Desktop section of
-[this official EWC documentation page](https://confluence.ecmwf.int/display/EWCLOUDKB/EUMETSAT+tenancy%3A+Default+setup).
 
 ## Inputs
 

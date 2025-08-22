@@ -11,6 +11,9 @@ connect to the [European Weather Cloud (EWC)](https://europeanweather.cloud/),
 as well as tenant users whom are mindful about safe-keeping the compute resources 
 or data withing their work environments. 
 
+For details on how to connect to a VM covered behind the SSH bastion,
+checkout the [official EWC documentation](https://confluence.ecmwf.int/display/EWCLOUDKB/EUMETSAT+tenancy%3A+Default+setup).
+
 ## Functionality
 The template is designed to:
 

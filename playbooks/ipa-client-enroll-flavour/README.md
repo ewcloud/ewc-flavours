@@ -12,6 +12,9 @@ integration of VMs into a [FreeIPA](https://www.freeipa.org/page/Main_Page)-mana
 fleet of instances within the EWC environment. Follow the [instructions below](#usage)
 to enroll your instance.
 
+For more information on how to work with an LDAP user account after VM
+enrollment, checkout the [official EWC documentation](https://confluence.ecmwf.int/display/EWCLOUDKB/Creating+new+Morpheus+and+LDAP+users).
+
 ## Functionality
 The template is designed to:
 - Configure a pre-existing virtual machine running Rocky Linux 8/9 or Ubuntu to connect to a

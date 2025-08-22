@@ -8,15 +8,14 @@ IPA provides integrated identity management and DNS services for centralized
 user authentication, authorization, and resource discovery. This template safely
 removes a VM from a [FreeIPA](https://www.freeipa.org/page/Main_Page)-managed
 environment, which is essential when decommissioning infrastructure to prevent
-stale entries in the IPA directory—such as obsolete host records, and DNS 
-pointers—that could lead to management overhead, naming conflicts or security
+stale entries in the IPA directory such as obsolete host records, and DNS 
+pointers, that could lead to management overhead, naming conflicts or security
 vulnerabilities from lingering credentials.
 
 Suitable for both tenant admin and tenant users, this template streamlines client
 removal, ensuring a clean and efficient identity system. The end benefit for 
 users is reduced administrative burden, improved security posture,
-and easier scaling or redeployment of resources. Follow the [instructions below](#usage)
-to disenroll your instance.
+and easier scaling or redeployment of resources. 
 
 ## Functionality
 The template is designed to:

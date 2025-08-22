@@ -9,8 +9,10 @@ management and DNS services, enabling centralized user authentication, authoriza
 and resource discovery.
 
 Ideal for tenant administrators, this template simplifies the setup
-of a secure, open-source identity and DNS solution in the EWC environment. Follow the
-[instructions below](#usage) to configure your server.
+of a secure, open-source identity and DNS solution in the EWC environment. 
+
+For information on how to manage the life-cycle of an IPA server or its
+replicas, checkout the [official EWC documentation](https://confluence.ecmwf.int/display/EWCLOUDKB/EUMETSAT+-+Configure+LDAP).
 
 ## Functionality
 The template is designed to:
