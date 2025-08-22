@@ -1,17 +1,23 @@
-# IPA client enroll flavour
-This subdirectory contains a configuration template
-(i.e. an [Ansible Playbook](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html))
-to customize your environment in the
-[European Weather Cloud (EWC)](https://europeanweather.cloud/).
+# IPA client enrollment flavour
 
+This Ansible Playbook configures an existing virtual machine in the
+[European Weather Cloud (EWC)](https://europeanweather.cloud/) to operate as a
+client of [IPA services](../ipa-server-flavour/).
+
+IPA provides integrated identity management and DNS services, enabling
+centralized user authentication, authorization, and resource discovery. 
+
+Suitable for tenant admins and tenant users alike, this template simplifies the
+integration of VMs into a [FreeIPA](https://www.freeipa.org/page/Main_Page)-managed
+fleet of instances within the EWC environment. Follow the [instructions below](#usage)
+to enroll your instance.
+
+## Functionality
 The template is designed to:
-
-* Configure a pre-existing RockyLinux or Ubuntu virtual machine to
-  connect to an IPA server running on the same subnet, such that it:
-  * Is able to leverage DNS resolution and discover other private
-    hosts or public addresses
-  * Is remotely accessible via public key or password to centrally
-    managed LDAP users
+- Configure a pre-existing virtual machine running Rocky Linux 8/9 or Ubuntu to connect to a
+IPA server on the same subnet.
+- Enable DNS resolution for discovering private hosts and public addresses.
+- Allow remote access to the VM using centrally managed LDAP users via password authentication.
 
 ## Usage
 

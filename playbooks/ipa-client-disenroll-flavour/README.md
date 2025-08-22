@@ -1,19 +1,30 @@
-# IPA client disenroll flavour
+# IPA Client Disenrollment flavour
 
-This subdirectory contains a configuration template
-(i.e. an [Ansible Playbook](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html))
-to customize your environment in the
-[European Weather Cloud (EWC)](https://europeanweather.cloud/).
+This Ansible Playbook configures an existing virtual machine in the
+[European Weather Cloud (EWC)](https://europeanweather.cloud/) to disenroll
+from a [IPA server](../ipa-server-flavour/).
 
-The template is designed to run on a virtual machine, running an
-[IPA client](https://www.freeipa.org/page/Client) previously enrolled in 
-your IPA server, such that it:
+IPA provides integrated identity management and DNS services for centralized
+user authentication, authorization, and resource discovery. This template safely
+removes a VM from a [FreeIPA](https://www.freeipa.org/page/Main_Page)-managed
+environment, which is essential when decommissioning infrastructure to prevent
+stale entries in the IPA directory—such as obsolete host records, and DNS 
+pointers—that could lead to management overhead, naming conflicts or security
+vulnerabilities from lingering credentials.
 
-* Requests configuration changes to said IPA server for:
-  * Stopping user authentication/authorization management (LDAP) to target 
-  instance
-  * Deletion of IPA server-internal DNS records referencing  the target 
-  instance machine, if and when found
+Suitable for both tenant admin and tenant users, this template streamlines client
+removal, ensuring a clean and efficient identity system. The end benefit for 
+users is reduced administrative burden, improved security posture,
+and easier scaling or redeployment of resources. Follow the [instructions below](#usage)
+to disenroll your instance.
+
+## Functionality
+The template is designed to:
+- Configure a pre-existing virtual machine, previously enrolled (likely with help of the [IPA client](../ipa-client-enroll-flavour/) template) to disconnect from an [IPA server](../ipa-server-flavour/).
+- Disable user authentication and authorization (LDAP) for the target instance.
+- Remove IPA server-internal DNS records referencing the target instance, if present.
+
+
 
 ## Usage
 

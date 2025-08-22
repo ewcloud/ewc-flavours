@@ -1,16 +1,17 @@
 # SSH bastion flavour
-The [SSH](https://en.wikipedia.org/wiki/Secure_Shell) proxy or bastion server
-is a barrier between your internal machines (without public or floating IPs)
-and the public internet. With the SSH proxy, you'll have an extra layer of 
+The [SSH](https://en.wikipedia.org/wiki/Secure_Shell) bastion or proxy server
+is a barrier between your internal machines (which lack a public or floating IP
+address) and the public internet. With the SSH proxy, you'll have an extra layer of 
 security on top of your instances. It's equipped with 
 [Fail2ban](https://github.com/fail2ban/fail2ban),
 intrusion prevention software designed to prevent brute-force attacks.
 
-This subdirectory contains a configuration template
-(i.e. an [Ansible Playbook](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html))
-to customize your environment in the
-[European Weather Cloud (EWC)](https://europeanweather.cloud/).
+This template is for tenant admins wishing to hardening the way tenant users
+connect to the [European Weather Cloud (EWC)](https://europeanweather.cloud/),
+as well as tenant users whom are mindful about safe-keeping the compute resources 
+or data withing their work environments. 
 
+## Functionality
 The template is designed to:
 
 * Configure a pre-existing virtual machine running RockyLinux, with public IP 

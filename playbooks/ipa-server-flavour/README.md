@@ -1,13 +1,18 @@
 # IPA server flavour
-IPA (acronym for identity, policy and audit) and its open-source 
-implementation [FreeIPA](https://www.freeipa.org/page/Main_Page), serve
-both as a user management system and as your internal DNS nameserver.
 
-This subdirectory contains a configuration template
-(i.e. an [Ansible Playbook](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html))
-to customize your environment in the
-[European Weather Cloud (EWC)](https://europeanweather.cloud/).
+This Ansible Playbook configures an existing virtual machine running
+within the [European Weather Cloud (EWC)](https://europeanweather.cloud/)
+to operate as a [FreeIPA](https://www.freeipa.org/page/Main_Page) server.
 
+IPA (acronym for identity, policy and audit), provides integrated identity
+management and DNS services, enabling centralized user authentication, authorization,
+and resource discovery.
+
+Ideal for tenant administrators, this template simplifies the setup
+of a secure, open-source identity and DNS solution in the EWC environment. Follow the
+[instructions below](#usage) to configure your server.
+
+## Functionality
 The template is designed to:
 * Validate that network/subnet configuration in the EWC tenancy
 * Configure a pre-existing virtual machine running RockyLinux version 8 or 9,
