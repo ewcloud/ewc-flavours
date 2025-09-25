@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.1](https://github.com/ewcloud/ewc-flavours/compare/2.0.0...2.0.1) (2025-09-25)
+
+
+### Bug Fixes
+
+* Dependency versions following new roles tag ([#4](https://github.com/ewcloud/ewc-flavours/issues/4)) ([cd7badd](https://github.com/ewcloud/ewc-flavours/commit/cd7baddf55b2c7989bba4acb741ecbbd2b44ba37))
+
 # [2.0.0](https://github.com/ewcloud/ewc-flavours/compare/1.0.0...2.0.0) (2025-08-12)
 
 
