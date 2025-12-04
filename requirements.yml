@@ -14,7 +14,7 @@ roles:
 
   - name: ewc-ansible-role-ecmwf-toolbox-1.0
     src: https://github.com/ewcloud/ewc-ansible-role-ecmwf-toolbox.git
-    version: 1.0.1
+    version: 1.0.2
 
   - name: ewc-ansible-role-jupyterhub-local-1.0
     src: https://github.com/ewcloud/ewc-ansible-role-jupyterhub-local.git
