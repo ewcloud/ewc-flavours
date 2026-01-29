@@ -80,7 +80,7 @@ jobs:
           osFlavorName: '${{ inputs.osFlavorName }}'
           osImageName: '${{ inputs.osImageName }}'
           instanceNamePrefix: '${{ inputs.instanceNamePrefix }}'
-          ansibleSshPrivateKey: '${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}'
+          ansibleSshPrivateKey: '${{ secrets.ECMWF_ANSIBLE_SSH_PRIVATE_KEY }}'
           pythonVersion: '${{ inputs.pythonVersion }}'
           ansibleVersion: '${{ inputs.ansibleVersion }}'
           ansibleUser: '${{ inputs.ansibleUser }}'
