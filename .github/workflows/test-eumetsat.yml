@@ -3,49 +3,56 @@ name: Deployment Test on EUMETSAT
 on:
   workflow_dispatch:
     inputs:
-      os-external-network-name:
+      osExternalNetworkName:
         required: true
         default: 'external'
 
-      os-private-network-name:
+      osPrivateNetworkName:
         required: true
         default: 'private'
 
-      os-security-group-name:
+      osSecurityGroupName:
         required: true
         default: 'ssh'
 
-      os-keypair-name:
+      osKeypairName:
         required: true
         default: 'github-keypair'
 
-      os-flavor-name:
+      osFlavorName:
         required: true
         default: 'eo1.large'
 
-      os-image-name:
+      osImageName:
         required: true
         default: 'ubuntu-24.04-20250604102601'
 
-      instance-name-prefix:
+      instanceNamePrefix:
         required: true
         default: 'github'
 
-      ansible-user:
+      pythonVersion:
+        required: true
+        default: '3.9.25'
+
+      ansibleVersion:
+        required: true
+        default: '8.7.0'
+
+      ansibleUser:
         required: true
         default: 'ubuntu'
 
-      path-to-main-file:
+      pathToMainFile:
         required: true
         default: 'playbooks/ecmwf-data-flavour/ecmwf-data-flavour.yml'
 
-      path-to-requirements-file:
+      pathToRequirementsFile:
         required: false
         default: 'requirements.yml'
 
-      input-spec-json:
+      inputSpecJson:
         required: false
-        default: '{"reboot_if_required":"false","ecmwf_toolbox_env_wipe":"false","ecmwf_toolbox_env_name":"ecmwf-toolbox","ecmwf_toolbox_create_ipykernel":"true","conda_prefix":"/opt/conda","conda_user":"root"}'
 
 permissions:
   contents: read
@@ -60,27 +67,30 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Test deployment
-        uses: ewcloud/ewc-gh-action-test-deploy-ansible-playbook@v1
+        id: test-deployment
+        uses: ewcloud/ewc-gh-action-test-deploy-ansible-playbook@v2
         with:
-          os-auth-url: '${{ secrets.EUMETSAT_OS_AUTH_URL }}'
-          os-region-name: '${{ secrets.EUMETSAT_OS_REGION_NAME }}'
-          os-application-credential-id: '${{ secrets.EUMETSAT_OS_APPLICATION_CREDENTIAL_ID }}'
-          os-application-credential-secret: '${{ secrets.EUMETSAT_OS_APPLICATION_CREDENTIAL_SECRET }}'
-          os-external-network-name: '${{ inputs.os-external-network-name }}'
-          os-private-network-name: '${{ inputs.os-private-network-name }}'
-          os-security-group-name: '${{ inputs.os-security-group-name }}'
-          os-keypair-name: '${{ inputs.os-keypair-name }}'
-          os-flavor-name: '${{ inputs.os-flavor-name }}'
-          os-image-name:  '${{ inputs.os-image-name }}'
-          instance-name-prefix: '${{ inputs.instance-name-prefix }}'
-          ansible-ssh-private-key: '${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}'
-          ansible-user: '${{ inputs.ansible-user }}'
-          path-to-main-file: '${{ inputs.path-to-main-file }}'
-          path-to-requirements-file: '${{ inputs.path-to-requirements-file }}'
-          input-spec-json: '${{ inputs.input-spec-json }}'
+          osAuthUrl: '${{ secrets.EUMETSAT_OS_AUTH_URL }}'
+          osRegionName: '${{ secrets.EUMETSAT_OS_REGION_NAME }}'
+          osApplicationCredentialId: '${{ secrets.EUMETSAT_OS_APPLICATION_CREDENTIAL_ID }}'
+          osApplicationCredentialSecret: '${{ secrets.EUMETSAT_OS_APPLICATION_CREDENTIAL_SECRET }}'
+          osExternalNetworkName: '${{ inputs.osExternalNetworkName }}'
+          osPrivateNetworkName: '${{ inputs.osPrivateNetworkName }}'
+          osSecurityGroupName: '${{ inputs.osSecurityGroupName }}'
+          osKeypairName: '${{ inputs.osKeypairName }}'
+          osFlavorName: '${{ inputs.osFlavorName }}'
+          osImageName: '${{ inputs.osImageName }}'
+          instanceNamePrefix: '${{ inputs.instanceNamePrefix }}'
+          ansibleSshPrivateKey: '${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}'
+          pythonVersion: '${{ inputs.pythonVersion }}'
+          ansibleVersion: '${{ inputs.ansibleVersion }}'
+          ansibleUser: '${{ inputs.ansibleUser }}'
+          pathToMainFile: '${{ inputs.pathToMainFile }}'
+          pathToRequirementsFile: '${{ inputs.pathToRequirementsFile }}'
+          inputSpecJson: '${{ inputs.inputSpecJson }}'
 
-      - name: Upload Build Artifacts
+      - name: Upload test deployment results
         uses: actions/upload-artifact@v4
         with:
-          name: workspace_artifacts
-          path: ${{ github.workspace }}/artifacts
+          name: artifacts_${{ github.run_id }}
+          path: ${{ steps.test-deployment.outputs.artifactPath }}
