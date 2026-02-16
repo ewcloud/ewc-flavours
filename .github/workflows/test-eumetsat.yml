@@ -49,6 +49,7 @@ on:
 
       pathToRequirementsFile:
         required: false
+        default: 'requirements.yml'
 
       inputSpecJson:
         required: false
